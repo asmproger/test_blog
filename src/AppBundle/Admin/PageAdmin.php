@@ -51,4 +51,9 @@ class PageAdmin extends AbstractAdmin
         }
         return 'Static page';
     }
+
+    public function preUpdate($product)
+    {
+        $product->setUpdated();
+    }
 }

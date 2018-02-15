@@ -8,18 +8,14 @@
 
 namespace AppBundle\Entity;
 
-use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
-use Doctrine\ORM\Mapping\PreUpdate;
-use Doctrine\ORM\Mapping\PrePersist;
-use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
 /**
  * @ORM\Entity
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="blog_page")
- * @HasLifecycleCallbacks
  */
 class Page
 {
@@ -173,17 +169,20 @@ class Page
     public function uploadPic()
     {
         if (null === $this->getFile()) {
-            //die('test 1');
             return;
         }
-        //die('test 2');
+
         $newName = md5(time()) . '.' . $this->getFile()->guessExtension();
 
         $this->file->move(
             self::FILE_PATH, $newName
         );
 
-        $this->setPic($newName);
+        $this->pic = $newName;
         $this->file = null;
+    }
+
+    public function setUpdated() {
+        $this->setModifiedDate(new \DateTime());
     }
 }
