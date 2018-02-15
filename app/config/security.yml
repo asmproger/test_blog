@@ -19,7 +19,7 @@ security:
             pattern: ^
             form_login:
                 provider: fos_userbundle
-                csrf_token: security.csrf.token_manager
+                csrf_provider: security.csrf.token_manager
             logout: true
             anonymous: true
 
