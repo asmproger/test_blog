@@ -5,14 +5,14 @@ parameters:
 
 services:
     # default configuration for services in *this* file
-    _defaults:
+#    _defaults:
         # automatically injects dependencies in your services
-        autowire: true
+#        autowire: true
         # automatically registers your services as commands, event subscribers, etc.
-        autoconfigure: true
+#        autoconfigure: true
         # this means you cannot fetch services directly from the container via $container->get()
         # if you need to do this, you can override this setting on individual services
-        public: false
+#        public: true
 
     # makes classes in src/AppBundle available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -28,6 +28,17 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
+
+    admin.page:
+        class: AppBundle\Admin\PageAdmin
+        arguments: [~, AppBundle\Entity\Page, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: Static Pages }
+        roles: [ROLE_ADMIN]
+        public: true
+        calls:
+            - [ setTemplate, [layout, 'admin/layout.html.twig'] ]
+            - [ setTemplate, [edit, 'admin/page/edit.html.twig'] ]
 
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:

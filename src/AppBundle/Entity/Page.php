@@ -10,14 +10,20 @@ namespace AppBundle\Entity;
 
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\ORM\Mapping\PreUpdate;
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="blog_page")
+ * @HasLifecycleCallbacks
  */
 class Page
 {
+    const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -40,6 +46,27 @@ class Page
      * @ORM\Column(type="text", nullable=true)
      */
     private $body;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $pic;
+
+    /**
+     * @return mixed
+     */
+    public function getPic()
+    {
+        return $this->pic;
+    }
+
+    /**
+     * @param mixed $pic
+     */
+    public function setPic($pic)
+    {
+        $this->pic = $pic;
+    }
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -124,5 +151,39 @@ class Page
     public function setModifiedDate($modified_date)
     {
         $this->modified_date = $modified_date;
+    }
+
+
+    private $file;
+
+    public function setFile(UploadedFile $file)
+    {
+        $this->file = $file;
+    }
+
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function uploadPic()
+    {
+        if (null === $this->getFile()) {
+            //die('test 1');
+            return;
+        }
+        //die('test 2');
+        $newName = md5(time()) . '.' . $this->getFile()->guessExtension();
+
+        $this->file->move(
+            self::FILE_PATH, $newName
+        );
+
+        $this->setPic($newName);
+        $this->file = null;
     }
 }
