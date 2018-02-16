@@ -40,6 +40,14 @@ services:
             - [ setTemplate, [layout, 'admin/layout.html.twig'] ]
             - [ setTemplate, [edit, 'admin/page/edit.html.twig'] ]
 
+    admin.setting:
+            class: AppBundle\Admin\SettingsAdmin
+            arguments: [~, AppBundle\Entity\Setting, ~]
+            tags:
+                - { name: sonata.admin, manager_type: orm, label: Settings }
+            roles: [ROLE_ADMIN]
+            public: true
+
     google_parser:
         class: AppBundle\Service\GoogleEngine
         public: true

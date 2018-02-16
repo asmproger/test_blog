@@ -9,60 +9,13 @@
 namespace AppBundle\Service;
 
 use AppBundle\Entity\BlogPost;
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Persistence\ManagerRegistry;
-
-if (!function_exists('print_arr')) {
-    function print_arr($var, $return = false, $special = true)
-    {
-        $type = gettype($var);
-
-        $out = print_r($var, true);
-        if ($special) {
-            //$out = htmlspecialchars($out);
-        }
-        $out = str_replace(' ', '&nbsp;', $out);
-        if ($type == 'boolean') {
-            $content = $var ? 'true' : 'false';
-        } else {
-            $content = nl2br($out);
-        }
-        $count = '';
-        if ($type == 'array') {
-            $count = ' (' . count($var) . ' items)';
-        }
-
-        $out = '<div style="
-       border:2px inset #666;
-       background:black;
-       font-family:monospace;
-       font-size:12px;
-       color:#6F6;
-       text-align:left;
-       margin:20px;
-       padding:16px">
-         <span style="color: #F66">(' . $type . ')</span>' . $count . ' ' . $content . '</div><br /><br />';
-
-        if (!$return)
-            echo $out;
-        else
-            return $out;
-    }
-}
-
-function print_die($var, $return = false, $special = true)
-{
-    print_arr($var, $return, $special);
-    $info = debug_backtrace();
-    print_arr("File: {$info[0]['file']} Line: {$info[0]['line']}");
-    die ();
-}
 
 /**
  * Class GoogleParser
  * @package AppBundle\Service
  *
- * This class parse
+ * This class parse results of search request to google
  */
 class GoogleParser
 {
@@ -82,6 +35,7 @@ class GoogleParser
     }
 
     /**
+     * After creation, we should set search query
      * @param mixed $query
      */
     public function setQuery($query)
@@ -95,27 +49,35 @@ class GoogleParser
      */
     private $xPath;
 
+    /**
+     * Here we parse DOMElement using DOMXpath and return array for inserting to DB
+     * @return array
+     * @throws \Exception
+     */
     public function getRow()
     {
+        // google has simplified html for such curl requests
+        // every result item has class "g"
         $rows = $this->xPath->query('//div[@class="g"]');
         foreach ($rows as $row) {
             $title = '';
             $body = '';
             $href = '';
 
-            //$a = $this->xPath->query('div[@class="s"]/div[@class="kv"]', $row);
+            // url for this item
             $a = $this->xPath->query('div[@class="s"]/div[@class="kv"]/cite', $row);
             if ($a->length) {
                 $href = $a->item(0)->textContent;
             }
 
+            // item title
             $h3 = $this->xPath->query('h3', $row);
             if ($h3->length) {
                 $title = $h3->item(0)->textContent;
-                }
+            }
 
+            // item body
             $span = $this->xPath->query('div[@class="s"]/span[@class="st"]', $row);
-
             if ($span->length) {
                 $body = $span->item(0)->textContent;
             }
@@ -133,6 +95,12 @@ class GoogleParser
         throw new \Exception('All rows imoprted');
     }
 
+    /**
+     * As for task, we should save unique rows. Here we can check, if there is same title in DB
+     *
+     * @param $title
+     * @return bool
+     */
     private function checkIfRowExist($title)
     {
         $rows = $this->doctrine->getManager()->getRepository(BlogPost::class)->findBy([
@@ -141,6 +109,9 @@ class GoogleParser
         return !empty($rows);
     }
 
+    /**
+     * After setting search query we can search & parse results
+     */
     public function parse()
     {
         $resultText = $this->request();
@@ -153,6 +124,10 @@ class GoogleParser
         return;
     }
 
+    /**
+     * just curl request
+     * @return mixed
+     */
     public function request()
     {
         $url = $this->getUrl();
@@ -165,81 +140,13 @@ class GoogleParser
 
     }
 
+    /**
+     * Create and return formatted search string for google
+     * @return string
+     */
     private function getUrl()
     {
         $string = urlencode($this->getQuery());
         return "www.google.com/search?q={$string}";
-    }
-
-    private function getDescription($node)
-    {
-        $description = '';
-        if ($node) {
-            $tmpNodes = $node->getElementsByTagName('span');
-            if ($tmpNodes) {
-                foreach ($tmpNodes as $tmp) {
-                    $class = ($tmp) ? $tmp->getAttribute('class') : '';
-                    if ($class == 'st') {
-                        $description = $tmp->textContent;
-                    }
-                }
-            }
-        }
-        return $description;
-    }
-
-    private function getTitle($node)
-    {
-        if ($node) {
-            $element = $node->item(0);
-            if ($element) {
-                return $element->textContent;
-            }
-        }
-        return '';
-    }
-
-    private function getHref($node)
-    {
-        $link = '';
-
-        if ($node) {
-            $href = $node->item(0);
-            if ($href) {
-                $a = $href->getElementsByTagName('a');
-                if ($a) {
-                    $link = $a->item(0)->getAttribute('href');
-                    $link = $this->processLink($link);
-                }
-            }
-        }
-
-        return $link;
-    }
-
-    private function getImage($node)
-    {
-        $image = '';
-        if ($node) {
-            $imgNode = $node->getElementsByTagName('img')->item(0);
-            if ($imgNode) {
-                $img = $imgNode->getAttribute('src');
-                $image = "<img src={$img}>";
-            }
-        }
-        return $image;
-    }
-
-    private function processLink($link)
-    {
-        $link = str_replace('/url?q=', '', $link);
-        if ($link) {
-            $pos = strpos($link, '&sa');
-            if ($pos !== false) {
-                $link = substr($link, 0, $pos);
-                return urldecode($link);
-            }
-        }
-        return $link;
     }
 }
