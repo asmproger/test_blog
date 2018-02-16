@@ -42,6 +42,16 @@ class CustomCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        /*$period = (int) $this->doctrine->getRepository(Setting::class)->getSetting('currency_update_period');
+        $lastUpdate = (int) $this->doctrine->getRepository(Setting::class)->getSetting('currency_last_update');
+
+        $period *= 60;
+
+        if( (time() - $lastUpdate) < $period) {
+            //$oFace->writeln('It\'s not time for this');
+            return;
+        }*/
+
         $query = $input->getArgument('query');
         if (empty($query)) {
             //$query = 'scarlett johansson';
