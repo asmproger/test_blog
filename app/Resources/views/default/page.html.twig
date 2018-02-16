@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
+            <h3>
+                {% if product %}
+                    {{ product.title }}
+                {% else %}
+                    NO PAGE
+                {% endif %}
+            </h3>
+        </div>
+    </div>
+{% endblock %}

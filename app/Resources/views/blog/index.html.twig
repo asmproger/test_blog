@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Title</th>
+                        <th>Short</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in paginator %}
+                        <tr>
+                            <td>
+                                {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
+                            </td>
+                            <td>
+                                <a href="{{ path('blog_view', {'id': item.id}) }}">
+                                    {{ item.title }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ item.short }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {{ knp_pagination_render(paginator) }}
+        </div>
+    </div>
+{% endblock %}

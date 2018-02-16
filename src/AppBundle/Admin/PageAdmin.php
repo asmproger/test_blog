@@ -38,7 +38,10 @@ class PageAdmin extends AbstractAdmin
 
     public function configureListFields(ListMapper $list)
     {
-        $list->addIdentifier('title');
+        $list
+            ->addIdentifier('title')
+            ->add('label')
+        ;
     }
 
     public function toString($object)

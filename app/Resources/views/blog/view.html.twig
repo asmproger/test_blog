@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
+            <br>
+            <a href="{{ path('blog_index') }}">Back</a>
+            <br>
+            {% if item %}
+                <h3>{{ item.title }}</h3>
+                <br>
+                {{ item.body }}
+            {% else %}
+                <h4>There is no so blog post.</h4>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

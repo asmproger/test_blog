@@ -29,7 +29,10 @@ class AppKernel extends Kernel
             new FOS\UserBundle\FOSUserBundle(),
 
             // Migrations
-            new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle()
+            new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
+
+            // KNP Paginator
+            new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle()
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

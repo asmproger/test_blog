@@ -13,11 +13,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Table(name="blog_page")
+ * @ORM\Table(name="blog_posts")
  */
-class Page
+class BlogPost
 {
     const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
@@ -46,7 +46,8 @@ class Page
         return $this->label;
     }
 
-    public function getUrl() {
+    public function getUrl()
+    {
         return $this->label;
     }
 
@@ -93,6 +94,94 @@ class Page
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $modified_date;
+
+
+    /**
+     * @ORM\Column(type="datetime", options={"default":"CURRENT_TIMESTAMP"})
+     */
+    private $created_date;
+
+
+    /**
+     * @ORM\Column(name="`enabled`", type="boolean", options={"default": true})
+     */
+    private $enabled;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $views_count;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $likes_count;
+
+
+    /**
+     * @return mixed
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * @param mixed $enabled
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getViewsCount()
+    {
+        return $this->views_count;
+    }
+
+    /**
+     * @param mixed $views_count
+     */
+    public function setViewsCount($views_count)
+    {
+        $this->views_count = $views_count;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLikesCount()
+    {
+        return $this->likes_count;
+    }
+
+    /**
+     * @param mixed $likes_count
+     */
+    public function setLikesCount($likes_count)
+    {
+        $this->likes_count = $likes_count;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreatedDate()
+    {
+        return $this->created_date;
+    }
+
+    /**
+     * @param mixed $created_date
+     */
+    public function setCreatedDate($created_date)
+    {
+        $this->created_date = $created_date;
+    }
+
 
     /**
      * @return mixed
@@ -194,7 +283,7 @@ class Page
     public function generateLabel()
     {
         $label = mb_strtolower($this->getTitle());
-        $label = str_replace([' ', '-', '+', '=', '!', '?' ], '_', $label);
+        $label = str_replace([' ', '-', '+', '=', '!', '?'], '_', $label);
         $this->setLabel($label);
     }
 
