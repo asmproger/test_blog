@@ -18,6 +18,14 @@ class BlogController extends Controller
      */
     public function indexAction(Request $request)
     {
+        /*$t = new GoogleParser($this->getDoctrine());
+        $t->setQuery('sibers');
+        $t->parse();
+        $row = $t->getRow();
+
+        print_r($row);
+        die('ok');*/
+
         /**
          * @var QueryBuilder $builder
          */
@@ -28,7 +36,7 @@ class BlogController extends Controller
         $query = $builder->getQuery();
 
         $p = $this->get('knp_paginator');
-        $paginator = $p->paginate( $query, $request->get('page', 1), 5);
+        $paginator = $p->paginate( $query, $request->get('page', 1), 10);
 
         // replace this example code with whatever you need
         return $this->render('blog/index.html.twig', [

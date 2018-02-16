@@ -9,6 +9,7 @@
             <br>
             {% if item %}
                 <h3>{{ item.title }}</h3>
+                <a target="_blank" href="{{ item.href }}">{{ item.href }}</a>
                 <br>
                 {{ item.body }}
             {% else %}

@@ -117,6 +117,26 @@ class BlogPost
      */
     private $likes_count;
 
+    /**
+     * @return mixed
+     */
+    public function getHref()
+    {
+        return $this->href;
+    }
+
+    /**
+     * @param mixed $href
+     */
+    public function setHref($href)
+    {
+        $this->href = $href;
+    }
+
+    /**
+     * @ORM\Column()
+     */
+    private $href;
 
     /**
      * @return mixed

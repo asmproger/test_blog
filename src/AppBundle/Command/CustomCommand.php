@@ -26,7 +26,7 @@ class CustomCommand extends Command
      */
     public function __construct(Registry $doctrine)
     {
-        $this->parser = new GoogleParser();
+        $this->parser = new GoogleParser($doctrine);
         $this->doctrine = $doctrine;
         parent::__construct();
     }
@@ -42,29 +42,32 @@ class CustomCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-
-        /*$period = (int) $this->doctrine->getRepository(Setting::class)->getSetting('currency_update_period');
-        $lastUpdate = (int) $this->doctrine->getRepository(Setting::class)->getSetting('currency_last_update');*/
-
-
         $query = $input->getArgument('query');
         if (empty($query)) {
-            $query = 'scarlett johansson';
+            //$query = 'scarlett johansson';
+            $query = 'sibers';
         }
         $output->writeln('Executing...');
         $output->writeln("Query string is '{$query}'");
 
         $this->parser->setQuery($query);
-        $result = $this->parser->parse();
+        $this->parser->parse();
+        try {
+            $row = $this->parser->getRow();
+        } catch (\Exception $e) {
+            // may be send letter to admin?
+            return;
+        }
+
 
         $output->writeln('----------------------');
-        $output->writeln($result);
+        $output->writeln($row);
         $output->writeln('----------------------');
 
         $em = $this->doctrine->getManager();
         $em->getConnection()->beginTransaction();
         try {
-            $post = $this->doctrine->getRepository(BlogPost::class)->setFromArray($result);
+            $post = $this->doctrine->getRepository(BlogPost::class)->setFromArray($row);
             $em->persist($post);
             $em->flush();
             $em->getConnection()->commit();

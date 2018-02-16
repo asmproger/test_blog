@@ -8,6 +8,10 @@
 
 namespace AppBundle\Service;
 
+use AppBundle\Entity\BlogPost;
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
+
 if (!function_exists('print_arr')) {
     function print_arr($var, $return = false, $special = true)
     {
@@ -53,10 +57,20 @@ function print_die($var, $return = false, $special = true)
     print_arr("File: {$info[0]['file']} Line: {$info[0]['line']}");
     die ();
 }
+
+/**
+ * Class GoogleParser
+ * @package AppBundle\Service
+ *
+ * This class parse
+ */
 class GoogleParser
 {
-    public function __construct()
+    private $doctrine;
+
+    public function __construct(ManagerRegistry $doctrine)
     {
+        $this->doctrine = $doctrine;
     }
 
     /**
@@ -76,43 +90,67 @@ class GoogleParser
     }
 
     private $query;
-    private $itemsList;
+    /**
+     * @var \DOMXPath $xPath
+     */
+    private $xPath;
+
+    public function getRow()
+    {
+        $rows = $this->xPath->query('//div[@class="g"]');
+        foreach ($rows as $row) {
+            $title = '';
+            $body = '';
+            $href = '';
+
+            //$a = $this->xPath->query('div[@class="s"]/div[@class="kv"]', $row);
+            $a = $this->xPath->query('div[@class="s"]/div[@class="kv"]/cite', $row);
+            if ($a->length) {
+                $href = $a->item(0)->textContent;
+            }
+
+            $h3 = $this->xPath->query('h3', $row);
+            if ($h3->length) {
+                $title = $h3->item(0)->textContent;
+                }
+
+            $span = $this->xPath->query('div[@class="s"]/span[@class="st"]', $row);
+
+            if ($span->length) {
+                $body = $span->item(0)->textContent;
+            }
+
+            $item = [
+                'title' => $title,
+                'body' => $body,
+                'href' => $href
+            ];
+
+            if (!$this->checkIfRowExist($title)) {
+                return $item;
+            }
+        }
+        throw new \Exception('All rows imoprted');
+    }
+
+    private function checkIfRowExist($title)
+    {
+        $rows = $this->doctrine->getManager()->getRepository(BlogPost::class)->findBy([
+            'title' => $title
+        ]);
+        return !empty($rows);
+    }
 
     public function parse()
     {
         $resultText = $this->request();
-
-        $bodyStart = strpos($resultText, '<div id="search"');
-        $bodyEnd = strpos($resultText, '<div id="foot">');
-        $body = substr($resultText, $bodyStart, $bodyEnd - $bodyStart);
-
+        //die($resultText);
         libxml_use_internal_errors(true);
         $dom = new \DOMDocument;
+        $dom->loadHTML($resultText);
 
-        if (!$dom->loadHTML($body)) {
-            throw new \Exception('parsing error');
-        }
-
-        $el1 = $dom->getElementById('ires');
-        if ($el1) {
-            $this->itemsList = $el1->firstChild->childNodes;
-        } else {
-            throw new \Exception('parsing error');
-        }
-
-
-        $rows = $this->getRow();
-        foreach ($rows as $row) {
-            return $row;
-        }
-
-        /*$item = [
-            'title' => 'Some title ' . mt_rand(1, 99999),
-            'short' => 'Some short',
-            'body' => 'Some body',
-            'pic' => 'some pic'
-        ];*/
-        //return $item;
+        $this->xPath = new \DOMXPath($dom);
+        return;
     }
 
     public function request()
@@ -120,7 +158,7 @@ class GoogleParser
         $url = $this->getUrl();
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);
         $result = curl_exec($curl);
         return $result;
@@ -133,34 +171,6 @@ class GoogleParser
         return "www.google.com/search?q={$string}";
     }
 
-    private function getRow()
-    {
-        for ($i = 0; $i < 5; $i++) {
-            /**
-             * @var $node \DOMElement;
-             */
-            $node = $this->itemsList->item($i);
-            if (!$node) {
-
-            }
-            $titleNode = $node->getElementsByTagName('h3');
-
-            $title = $this->getTitle($titleNode);
-            $href = $this->getHref($titleNode);
-            $description = $this->getDescription($node);
-            $img = $this->getImage($node);
-
-            $row = array(
-                'pic' => $img,
-                //'href' => $href,
-                'title' => $title,
-                'body' => $description,
-                'short' => substr($description, 0, 200)
-            );
-            yield $row;
-        }
-    }
-
     private function getDescription($node)
     {
         $description = '';
@@ -231,171 +241,5 @@ class GoogleParser
             }
         }
         return $link;
-    }
-}
-
-class GoogleEngine
-{
-    private $_itemsList;
-
-    public function getHtml($count = 0)
-    {
-        $this->_rowsCount = $count;
-        $url = $this->getSearchUrl();
-        $html = '';
-        try {
-            $this->search($url);
-
-            $this->parseResult();
-
-            $rows = $this->getRow();
-
-            foreach ($rows as $row) {
-                $rowHtml = $this->getRowHtml($row);
-                $html .= trim($rowHtml);
-            }
-
-            return $html;
-        } catch (Exception $e) {
-            return '';
-        }
-    }
-
-    private function getSearchUrl()
-    {
-        $string = urlencode($this->string);
-        return "www.google.com/search?q={$string}";
-    }
-
-    private function parseResult()
-    {
-        $bodyStart = strpos($this->_resultHtml, '<div id="search"');
-        $bodyEnd = strpos($this->_resultHtml, '<div id="foot">');
-        $this->_resultBody = substr($this->_resultHtml, $bodyStart, $bodyEnd - $bodyStart);
-
-        libxml_use_internal_errors(true);
-        $dom = new DOMDocument;
-
-        if (!$dom->loadHTML($this->_resultBody)) {
-            throw new Exception;
-        }
-        $el1 = $dom->getElementById('ires');
-        if ($el1) {
-            $this->_itemsList = $el1->firstChild->childNodes;
-        } else {
-            throw new Exception;
-        }
-    }
-
-    private function getRow()
-    {
-        for ($i = 0; $i < $this->_rowsCount; $i++) {
-            /**
-             * @var $node DOMElement;
-             */
-            $node = $this->_itemsList->item($i);
-            if (!$node) {
-
-            }
-            $titleNode = $node->getElementsByTagName('h3');
-
-            $title = $this->getTitle($titleNode);
-            $href = $this->getHref($titleNode);
-            $description = $this->getDescription($node);
-            $img = $this->getImage($node);
-
-            $row = array(
-                'image' => $img,
-                'href' => $href,
-                'title' => $title,
-                'description' => $description
-            );
-            yield $row;
-        }
-
-    }
-
-    private function getDescription($node)
-    {
-        $description = '';
-        if ($node) {
-            $tmpNodes = $node->getElementsByTagName('span');
-            if ($tmpNodes) {
-                foreach ($tmpNodes as $tmp) {
-                    $class = ($tmp) ? $tmp->getAttribute('class') : '';
-                    if ($class == 'st') {
-                        $description = $tmp->textContent;
-                    }
-                }
-            }
-        }
-        return $description;
-    }
-
-    private function getTitle($node)
-    {
-        if ($node) {
-            $element = $node->item(0);
-            if ($element) {
-                return $element->textContent;
-            }
-        }
-        return '';
-    }
-
-    private function getHref($node)
-    {
-        $link = '';
-
-        if ($node) {
-            $href = $node->item(0);
-            if ($href) {
-                $a = $href->getElementsByTagName('a');
-                if ($a) {
-                    $link = $a->item(0)->getAttribute('href');
-                    $link = $this->processLink($link);
-                }
-            }
-        }
-
-        return $link;
-    }
-
-    private function getImage($node)
-    {
-        $image = '';
-        if ($node) {
-            $imgNode = $node->getElementsByTagName('img')->item(0);
-            if ($imgNode) {
-                $img = $imgNode->getAttribute('src');
-                $image = "<img src={$img}>";
-            }
-        }
-        return $image;
-    }
-
-    private function processLink($link)
-    {
-        $link = str_replace('/url?q=', '', $link);
-        if ($link) {
-            $pos = strpos($link, '&sa');
-            if ($pos !== false) {
-                $link = substr($link, 0, $pos);
-                return urldecode($link);
-            }
-        }
-        return $link;
-    }
-
-    private function getRowHtml($row = array())
-    {
-        if (!$row) {
-            return '';
-        }
-        $template = file_get_contents('tpls/row.tpl');
-        foreach ($row as $k => $v) {
-            $template = str_replace('{' . $k . '}', trim($v), $template);
-        }
-        return $template;
     }
 }
