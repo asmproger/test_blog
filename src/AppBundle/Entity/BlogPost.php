@@ -241,7 +241,7 @@ class BlogPost
      */
     public function getShort()
     {
-        return $this->short;
+        return strlen($this->short) ? $this->short : substr($this->body, 0, 200);
     }
 
     /**

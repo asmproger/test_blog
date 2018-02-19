@@ -6,7 +6,7 @@
  * Time: 11:17 AM
  */
 
-namespace AppBundle\Service;
+namespace AppBundle\Utils;
 
 use AppBundle\Entity\BlogPost;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -44,10 +44,60 @@ class GoogleParser
     }
 
     private $query;
+
+    private $limit;
+
     /**
      * @var \DOMXPath $xPath
      */
     private $xPath;
+
+    public function getRows()
+    {
+        $rows = [];
+        // google has simplified html for such curl requests
+        // every result item has class "g"
+        $rowsHtml = $this->xPath->query('//div[@class="g"]');
+        $cntr = 0;
+        //for($i = 0; $i < $this->limit ;$i++) {
+        foreach ($rowsHtml as $row) {
+            if($cntr >= $this->getLimit()) {
+                break;
+            }
+
+            $item = [
+                'title' => '',
+                'body' => '',
+                'href' => ''
+            ];
+            // url for this item
+            $a = $this->xPath->query('div[@class="s"]/div[@class="kv"]/cite', $row);
+            if ($a->length) {
+                //$href = $a->item(0)->textContent;
+                $item['href'] = $a->item(0)->textContent;
+            }
+
+            // item title
+            $h3 = $this->xPath->query('h3', $row);
+            if ($h3->length) {
+                $title = $h3->item(0)->textContent;
+                $item['title'] = $h3->item(0)->textContent;
+            }
+
+            // item body
+            $span = $this->xPath->query('div[@class="s"]/span[@class="st"]', $row);
+            if ($span->length) {
+                $item['body'] = $span->item(0)->textContent;
+            }
+
+            if (!$this->checkIfRowExist($title)) {
+                $rows[] = $item;
+                $cntr++;
+            }
+        }
+
+        return $rows;
+    }
 
     /**
      * Here we parse DOMElement using DOMXpath and return array for inserting to DB
@@ -92,6 +142,7 @@ class GoogleParser
                 return $item;
             }
         }
+        return null;
         throw new \Exception('All rows imoprted');
     }
 
@@ -147,6 +198,22 @@ class GoogleParser
     private function getUrl()
     {
         $string = urlencode($this->getQuery());
-        return "www.google.com/search?q={$string}";
+        return "www.google.com/search?q={$string}&num=100";
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLimit()
+    {
+        return $this->limit;
+    }
+
+    /**
+     * @param mixed $limit
+     */
+    public function setLimit($limit)
+    {
+        $this->limit = $limit;
     }
 }

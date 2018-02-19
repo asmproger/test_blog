@@ -11,7 +11,8 @@ namespace AppBundle\Command;
 use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Setting;
 use AppBundle\Repository\BlogPostRepository;
-use AppBundle\Service\GoogleParser;
+use AppBundle\Utils\GoogleParser;
+use AppBundle\Utils\QueryHelper;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,6 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CustomCommand extends Command
 {
+    private $helper;
     private $parser;
     private $doctrine;
 
@@ -34,8 +36,8 @@ class CustomCommand extends Command
      */
     public function __construct(Registry $doctrine)
     {
-        $this->parser = new GoogleParser($doctrine);
         $this->doctrine = $doctrine;
+        $this->helper = new QueryHelper($doctrine);
         parent::__construct();
     }
 
@@ -51,9 +53,9 @@ class CustomCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         //fetching settings from DB or input
-        $query = $this->doctrine->getRepository(Setting::class)->getSetting(
+        /*$query = $this->doctrine->getRepository(Setting::class)->getSetting(
             'parser_task_query', $input->getArgument('query')
-        );
+        );*/
         $period = (int)$this->doctrine->getRepository(Setting::class)->getSetting('parser_task_period', 10);
         $lastUpdate = (int)$this->doctrine->getRepository(Setting::class)->getSetting('parser_task_last_update', 0);
 
@@ -65,48 +67,12 @@ class CustomCommand extends Command
             return;
         }
 
-        // default query, if there is no setting in db, and no input
-        if (empty($query)) {
-            //$query = 'scarlett johansson';
-            $query = 'sibers';
-        }
         $output->writeln([
-            'query - ' => $query,
             'period - ' => $period,
             'lastUpdate - ' => $lastUpdate
         ]);
 
         $output->writeln('Executing...');
-        $output->writeln("Query string is '{$query}'");
-
-        // work with parser class
-        $this->parser->setQuery($query);
-        $this->parser->parse();
-        try {
-            $row = $this->parser->getRow();
-        } catch (\Exception $e) {
-            // something went wrong
-            // may be send letter to admin?
-            return;
-        }
-
-
-        $output->writeln('----------------------');
-        $output->writeln($row);
-        $output->writeln('----------------------');
-
-        $em = $this->doctrine->getManager();
-        $em->getConnection()->beginTransaction();
-        try {
-            $post = $this->doctrine->getRepository(BlogPost::class)->setFromArray($row);
-            $em->persist($post);
-            $em->flush();
-            $em->getConnection()->commit();
-            // everything is ok? lets update time for this task!
-            $this->doctrine->getRepository(Setting::class)->setSetting('parser_task_last_update', time());
-        } catch (\Exception $e) {
-            $em->getConnection()->rollBack();
-        }
-
+        $this->helper->execute($output);
     }
 }

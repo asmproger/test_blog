@@ -84,5 +84,8 @@ class Setting
         $this->value = $value;
     }
 
+    public function isNew() {
+        return empty($this->getSkey()) && empty($this->getValue());
+    }
 }
 

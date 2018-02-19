@@ -36,8 +36,7 @@ class BlogController extends Controller
         $query = $builder->getQuery();
 
         $p = $this->get('knp_paginator');
-        $paginator = $p->paginate( $query, $request->get('page', 1), 10);
-
+        $paginator = $p->paginate( $query, $request->get('page', 1), 30);
         // replace this example code with whatever you need
         return $this->render('blog/index.html.twig', [
             'paginator' => $paginator,

@@ -1,0 +1,26 @@
+<html>
+<head></head>
+<body>
+    <h3>Report</h3>
+    <div>
+        <p>
+            Hi!<br><br>
+            During the last 'Query task' there were collected <b>{{ report.postCollected }}</b> posts.
+            <br><br>
+            This required <b>{{ report.time }}</b> seconds.
+            <br>
+        </p>
+        {%  if report.problems is defined %}
+            Problems occured during task execution:
+            <ul>
+            {%  for problem in report.problems %}
+                <li>{{ problem }}</li>
+            {%  endfor %}
+            </ul>
+        {%  endif %}
+    </div>
+<br>
+<br>
+Sinserely yours, Test Blog team.
+</body>
+</html>
