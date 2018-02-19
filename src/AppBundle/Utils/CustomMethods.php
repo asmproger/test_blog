@@ -8,7 +8,11 @@
 
 namespace AppBundle\Utils;
 
-
+/**
+ * Just for my favorite debug methods
+ * Class CustomMethods
+ * @package AppBundle\Utils
+ */
 class CustomMethods
 {
     public static function print_arr($var, $return = false, $special = true) {

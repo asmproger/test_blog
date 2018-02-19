@@ -8,15 +8,14 @@
 
 namespace AppBundle\Command;
 
-use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Setting;
-use AppBundle\Repository\BlogPostRepository;
-use AppBundle\Utils\GoogleParser;
 use AppBundle\Utils\QueryHelper;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * This is custom command for Symfony console.
@@ -28,16 +27,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CustomCommand extends Command
 {
     private $helper;
-    private $parser;
     private $doctrine;
-
+    private $logger;
+private $e;
     /**
      * CustomCommand constructor.
      */
-    public function __construct(Registry $doctrine)
+    public function __construct(Registry $doctrine, \Swift_Mailer $mailer, \Twig_Environment $twig, LoggerInterface $logger, $e)
     {
         $this->doctrine = $doctrine;
-        $this->helper = new QueryHelper($doctrine);
+        $this->helper = new QueryHelper($doctrine, $mailer, $twig, $logger, $e);
+        $this->logger = $logger;
+        $this->e = $e;
         parent::__construct();
     }
 
@@ -64,7 +65,7 @@ class CustomCommand extends Command
         // is it showtime?
         if( (time() - $lastUpdate) < $period) {
             $output->writeln('It\'s not time for this');
-            return;
+            //return;
         }
 
         $output->writeln([

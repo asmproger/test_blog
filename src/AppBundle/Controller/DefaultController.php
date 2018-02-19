@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Page;
 use AppBundle\Utils\QueryHelper;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,8 +25,10 @@ class DefaultController extends Controller
     /**
      * @Route("/test", name="default_test")
      */
-    public function testAction(Request $request, \Swift_Mailer $mailer)
+    public function testAction(Request $request, \Swift_Mailer $mailer, LoggerInterface $logger)
     {
+        $logger->error('ok');
+        die;
         $helper = new QueryHelper($this->getDoctrine(), $this->get('mailer'), $this->get('twig'));
         $helper->execute(null);
 

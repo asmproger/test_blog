@@ -52,6 +52,10 @@ class GoogleParser
      */
     private $xPath;
 
+    /**
+     * same to getRow, but for $limit number of rows
+     * @return array
+     */
     public function getRows()
     {
         $rows = [];
