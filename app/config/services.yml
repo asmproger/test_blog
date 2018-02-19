@@ -81,6 +81,13 @@ services:
         tags:
             - { name: kernel.event_listener, event: custom_fetch, method: 'onFetch' }
 
+    custom_listener:
+        class: AppBundle\Utils\Listen
+        arguments:
+            $logger: '@logger'
+        tags:
+            - { name: kernel.event_listener, event: custom_list, method: 'trig' }
+
 
 
     # add more services, or override services that need manual wiring

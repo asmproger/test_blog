@@ -7,6 +7,7 @@ use AppBundle\Utils\QueryHelper;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
@@ -27,7 +28,12 @@ class DefaultController extends Controller
      */
     public function testAction(Request $request, \Swift_Mailer $mailer, LoggerInterface $logger)
     {
+        die('test controller');
         $logger->error('ok');
+
+        $dispatcher = $this->get('event_dispatcher_custom');
+        $dispatcher->dispatch('custom_list', new GenericEvent());
+
         die;
         $helper = new QueryHelper($this->getDoctrine(), $this->get('mailer'), $this->get('twig'));
         $helper->execute(null);

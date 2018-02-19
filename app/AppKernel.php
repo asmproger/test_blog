@@ -81,6 +81,11 @@ class AppKernel extends Kernel
                         'method' => 'onFetch',
                     ));
 
+                $container->register('custom_listener', \AppBundle\Utils\Listen::class)
+                    ->addTag('kernel.event_listener', array(
+                        'event' => 'custom_list',
+                        'method' => 'trig',
+                    ));
 
                 $container->setParameter('container.autowiring.strict_mode', true);
                 $container->setParameter('container.dumper.inline_class_loader', true);
