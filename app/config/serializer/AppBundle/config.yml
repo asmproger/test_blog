@@ -1,5 +1,0 @@
-AppBundle\Entity\BlogPost:
-    exclusion_policy: ALL
-    properties:
-        balance:
-            expose: true

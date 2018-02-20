@@ -2,12 +2,18 @@
 
 {% block body %}
     <script>
-        var page = 1,
-            pages = parseInt({{ pages }}),
-            bList, bItem;
-        $(document).ready(function () {
-            bList = $('.blogs-list');
-            bItem = $('.blog-item');
+
+        function getpagesCount() {
+            $.ajax({
+                dataType: 'html',
+                url: '{{ path("get_blogs_count") }}',
+                success: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function loadPage(page) {
             $.ajax({
                 dataType: 'html',
                 url: '{{ path("get_blog_all", {"page": 1, "ipp": 10}) }}',
@@ -15,6 +21,18 @@
                     $('#table_content').html(html)
                 }
             });
+        }
+
+        var page = 1,
+            pages = 1,
+            bList, bItem;
+        $(document).ready(function () {
+            bList = $('.blogs-list');
+            bItem = $('.blog-item');
+
+            pages = getpagesCount();
+            alert(pages);
+            loadPage(1);
         });
 
         $(document).on('click', '.pagination a', function (e) {
