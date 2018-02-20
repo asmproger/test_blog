@@ -29,12 +29,17 @@ class AppKernel extends Kernel
 
             // FOS
             new FOS\UserBundle\FOSUserBundle(),
+            new FOS\RestBundle\FOSRestBundle(),
 
             // Migrations
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
 
             // KNP Paginator
-            new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle()
+            new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle(),
+
+            // JMS Serialization
+            new JMS\SerializerBundle\JMSSerializerBundle()
+
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

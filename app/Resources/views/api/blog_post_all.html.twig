@@ -1,0 +1,15 @@
+{% for item in items %}
+    <tr>
+        <td>
+            {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
+        </td>
+        <td>
+            <a data-id="{{ item.id }}" class="blog-title" href="javascript://">
+                {{ item.title }}
+            </a>
+        </td>
+        <td>
+            {{ item.short }}
+        </td>
+    </tr>
+{% endfor %}

@@ -11,12 +11,15 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\Groups;
 /**
  * Model for blog posts
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="blog_posts")
+ * @ExclusionPolicy("all")
  */
 class BlogPost
 {
@@ -25,12 +28,15 @@ class BlogPost
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
-     *
+     * @Expose
+     * @Groups({"blog_post"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $title;
 
@@ -67,11 +73,15 @@ class BlogPost
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $body;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $pic;
 

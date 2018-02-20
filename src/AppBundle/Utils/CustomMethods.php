@@ -54,5 +54,6 @@ class CustomMethods
         CustomMethods::print_arr($var, $return, $special);
         $info = debug_backtrace();
         CustomMethods::print_arr("File: {$info[0]['file']} Line: {$info[0]['line']}");
+        die;
     }
 }

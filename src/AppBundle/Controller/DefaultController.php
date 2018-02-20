@@ -2,7 +2,9 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Page;
+use AppBundle\Utils\CustomMethods;
 use AppBundle\Utils\QueryHelper;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -13,6 +15,24 @@ use Symfony\Component\HttpFoundation\Request;
 class DefaultController extends Controller
 {
     /**
+     * @Route("/rest-blog", name="rest_blog")
+     * @param Request $request
+     */
+    public function blogAction(Request $request) {
+
+        $data = file_get_contents('http://test_blog.local/app_dev.php/api/v1/blogs-count');
+        $obj = json_decode($data);
+
+        $ipp = 10;
+        $pages = ceil($obj->count / $ipp);
+
+        return $this->render('default/rest_blog.html.twig', [
+            'pages' => $pages,
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
+        ]);
+    }
+
+    /**
      * @Route("/", name="homepage")
      */
     public function indexAction(Request $request)
@@ -21,6 +41,15 @@ class DefaultController extends Controller
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
         ]);
+    }
+
+    /**
+     * @Route("/test2", name="default_rest")
+     * @param Request $request
+     */
+    public function test2Action(Request $request)
+    {
+        return $this->render('default/rest.html.twig', []);
     }
 
     /**
