@@ -52,7 +52,10 @@
                 url: '/app_dev.php/api/v1/blogs/' + id,
                 type: 'get',
                 data: {},
-                beforeSend: function () {
+                headers: {
+                    'Accept' : '*/*'
+                },
+                beforeSend: function (request) {
                     $('#table_content').css('opacity', 0.5);
                 },
                 success: function (html, statusText, obj) {
