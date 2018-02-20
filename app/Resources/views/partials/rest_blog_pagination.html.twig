@@ -1,13 +1,4 @@
-<nav aria-label="Page navigation" class="text-center">
-    {% if pages > 1 %}
-        <ul class="pagination">
-            {% for i in 1..pages %}
-                <li class="{% if page == i %}active{% endif %}">
-                    <span>
-                        <a data-page="{{ i }}" href="javascript://">{{ i }}</a>
-                    </span>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+<nav aria-label="Page navigation" class="text-center paginator-wrapper">
+    <ul class="pagination">
+    </ul>
 </nav>

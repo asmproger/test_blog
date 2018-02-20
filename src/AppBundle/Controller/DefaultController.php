@@ -19,15 +19,7 @@ class DefaultController extends Controller
      * @param Request $request
      */
     public function blogAction(Request $request) {
-
-        /*$data = file_get_contents('http://test_blog.local/app_dev.php/api/v1/blogs-count');
-        $obj = json_decode($data);
-
-        $ipp = 10;
-        $pages = ceil($obj->count / $ipp);*/
-
         return $this->render('default/rest_blog.html.twig', [
-            'pages' => $pages,
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
         ]);
     }

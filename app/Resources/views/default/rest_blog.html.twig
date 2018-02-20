@@ -2,84 +2,134 @@
 
 {% block body %}
     <script>
-
-        function getpagesCount() {
-            $.ajax({
-                dataType: 'html',
-                url: '{{ path("get_blogs_count") }}',
-                success: function (response) {
-                    console.log(response);
-                }
-            });
-        }
-
-        function loadPage(page) {
-            $.ajax({
-                dataType: 'html',
-                url: '{{ path("get_blog_all", {"page": 1, "ipp": 10}) }}',
-                success: function (html, statusText, obj) {
-                    $('#table_content').html(html)
-                }
-            });
-        }
-
-        var page = 1,
+        // init vars
+        var current_page = 1,
             pages = 1,
-            bList, bItem;
-        $(document).ready(function () {
-            bList = $('.blogs-list');
-            bItem = $('.blog-item');
+            bList, bItem, paginationContainer, table;
 
-            pages = getpagesCount();
-            alert(pages);
-            loadPage(1);
-        });
+        // update active element
+        function updatePagination() {
+            paginationContainer.find('li.active').removeClass('active');
+            paginationContainer.find('a[data-page="'+current_page+'"]').closest('li').addClass('active');
+        }
 
-        $(document).on('click', '.pagination a', function (e) {
-            var self = $(this);
-            var aPage = parseInt(self.data('page'));
-            if (aPage == page) {
+        // create paginator, with pages count from server
+        function buildPagination() {
+            if(pages <= 1) {
                 return;
             }
+            for(var i = 1; i <= pages; i++) {
+                var $item = $('<li></li>');
+                var $span = $('<span></span>');
+                var $a = $('<a>', {'data-page': i, 'href': 'javascript://', 'html': i});
+                $span.append($a);
+                $item.append($span);
+                if(i === 1) {
+                    $item.addClass('active');
+                }
+                paginationContainer.append($item);
+            }
+        }
+
+        // retieve pages count from server
+        // callback - any function you want
+        function updatePagesCount(callback) {
             $.ajax({
-                url: '/app_dev.php/api/v1/blogs/' + aPage + '/10',
-                beforeSend: function () {
-                    $('#table_content').css('opacity', 0.5);
-                },
-                success: function (html, statusText, obj) {
-                    $('#table_content').html(html);
-                    page = aPage;
-                    $('.pagination li.active').removeClass('active');
-                    self.closest('li').addClass('active');
-                    $('#table_content').css('opacity', 1);
+                dataType: 'json',
+                url: '{{ path("get_blogs_count") }}',
+                success: function (response) {
+                    pages = parseInt(response.count);
+                    pages /= 10; // dirty hack
+
+
+
+                    if(typeof callback === 'function') {
+                        callback();
+                    }
                 }
             });
+        }
+
+        // load selected page from server with REST
+        function loadPage(page) {
+            // dirty hack, will be replaced with bundle
+            var url = '{{ path("get_blog_all", {"page": "page_id", "ipp": 10 }) }}';
+            url = url.replace("page_id", page);
+            $.ajax({
+                dataType: 'html',
+                url: url,
+                beforeSend: function() {
+                    postsWrapper.css('opacity', 0.5);
+                },
+                success: function (html, statusText, obj) {
+                    current_page = page;
+
+                    postsWrapper.html(html);
+                    postsWrapper.css('opacity', 1);
+
+                    // update active page on paginator
+                    updatePagination();
+                }
+            });
+        }
+
+
+        $(document).ready(function () {
+            postsWrapper = $('#table_content');
+            paginationContainer = $('.paginator-wrapper .pagination');
+            // wrapper for posts table
+            bList = $('.blogs-list');
+            //wrapper for blog item (when view)
+            bItem = $('.blog-item');
+
+            // let's get pages count from server and build paginator
+            updatePagesCount(function() {
+                loadPage(1);
+                buildPagination();
+            });
+
+        });
+
+        // for paginator links
+        $(document).on('click', '.pagination a', function (e) {
+            var self = $(this);
+            var page = parseInt(self.data('page'));
+            if (page !== current_page) {
+                loadPage(page);
+            }
+
             return false;
         });
 
+        // back to posts list from viewving single post
         $(document).on('click', '.back-to-list', function () {
             bList.show();
             bItem.hide();
             bItem.html('');
         });
+
+        // lets view single item
         $(document).on('click', '.blog-title', function () {
             var self = $(this);
             var id = self.data('id');
+            // dirty hack, will be replaced with bundle
+            var url = '{{ path("get_blog", {"id": "id" }) }}';
+            url = url.replace("id", id);
             $.ajax({
-                url: '/app_dev.php/api/v1/blogs/' + id,
+                url: url,
                 type: 'get',
                 data: {},
                 headers: {
                     'Accept' : '*/*'
                 },
                 beforeSend: function (request) {
-                    $('#table_content').css('opacity', 0.5);
+                    postsWrapper.css('opacity', 0.5);
                 },
                 success: function (html, statusText, obj) {
                     bItem.html(html);
                     bList.hide();
                     bItem.show();
-                    $('#table_content').css('opacity', 1);
+                    postsWrapper.css('opacity', 1);
                 }
             });
         });
@@ -104,7 +154,7 @@
                     {# fot ajax content #}
                     </tbody>
                 </table>
-                {% include "partials/rest_blog_pagination.html.twig" with {'pages' : pages, page: 1} %}
+                {% include "partials/rest_blog_pagination.html.twig" %}
             </div>
 
             <div class="blog-item" style="display: none;"></div>
