@@ -8,7 +8,6 @@
         $(document).ready(function () {
             bList = $('.blogs-list');
             bItem = $('.blog-item');
-
             $.ajax({
                 dataType: 'html',
                 url: '{{ path("get_blog_all", {"page": 1, "ipp": 10}) }}',

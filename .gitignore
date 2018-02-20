@@ -1,4 +1,5 @@
 .idea
+app/config/parameters.yml
 vendor
 var/cache
 var/logs
