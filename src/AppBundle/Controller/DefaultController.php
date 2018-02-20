@@ -20,11 +20,11 @@ class DefaultController extends Controller
      */
     public function blogAction(Request $request) {
 
-        $data = file_get_contents('http://test_blog.local/app_dev.php/api/v1/blogs-count');
+        /*$data = file_get_contents('http://test_blog.local/app_dev.php/api/v1/blogs-count');
         $obj = json_decode($data);
 
         $ipp = 10;
-        $pages = ceil($obj->count / $ipp);
+        $pages = ceil($obj->count / $ipp);*/
 
         return $this->render('default/rest_blog.html.twig', [
             'pages' => $pages,
