@@ -1,0 +1,163 @@
+{% extends 'base.html.twig' %}
+{% block scripts %}
+    <script src="{{ asset('js/angular-1.6.9/angular.js') }}"></script>
+    <script src="{{ asset('js/angular-1.6.9/angular-route.js') }}"></script>
+    <script src="{{ asset('js/ang.js') }}"></script>
+{% endblock %}
+{% block body %}
+    <script>
+
+    </script>
+    <div id="wrapper">
+        <div id="container">
+            {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
+            <div id="welcome">
+                <h1><span>REST ANGULAR BLOG</span></h1>
+            </div>
+
+
+            <div ng-view class="view-frame"></div>
+
+            <div class="ang-blog-root" ng-app="blogApp">
+                <div ng-view>
+
+                </div>
+                {#<div ng-controller="PostsListController">#}
+                    {#<table class="table">#}
+                        {#<thead>#}
+                            {#<tr>#}
+                                {#<th></th>#}
+                                {#<th>Title</th>#}
+                                {#<th>Short</th>#}
+                            {#</tr>#}
+                        {#</thead>#}
+                        {#<tbody>#}
+                            {#<tr ng-repeat="item in items">#}
+                                {#<td><img onload="$(this).show()" style="display: none; width: 150px;" src="/uploads/images/{[{ item.pic }]}"/></td>#}
+                                {#<td><a href="#!/posts/{[{ item.id }]}">{[{ item.title }]}</a></td>#}
+                                {#<td>{[{ item.body }]}</td>#}
+                            {#</tr>#}
+                        {#</tbody>#}
+                    {#</table>#}
+                {#</div>#}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block stylesheets %}
+    <style>
+        #rest-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid gray;
+
+        }
+
+        body {
+            background: #F5F5F5;
+            font: 18px/1.5 sans-serif;
+        }
+
+        h1, h2 {
+            line-height: 1.2;
+            margin: 0 0 .5em;
+        }
+
+        h1 {
+            font-size: 36px;
+        }
+
+        h2 {
+            font-size: 21px;
+            margin-bottom: 1em;
+        }
+
+        p {
+            margin: 0 0 1em 0;
+        }
+
+        a {
+            color: #0000F0;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+
+        code {
+            background: #F5F5F5;
+            max-width: 100px;
+            padding: 2px 6px;
+            word-wrap: break-word;
+        }
+
+        #wrapper {
+            background: #FFF;
+            margin: 1em auto;
+            max-width: 800px;
+            width: 95%;
+        }
+
+        #container {
+            padding: 2em;
+        }
+
+        #welcome, #status {
+            margin-bottom: 2em;
+        }
+
+        #welcome h1 span {
+            display: block;
+            font-size: 75%;
+        }
+
+        #icon-status, #icon-book {
+            float: left;
+            height: 64px;
+            margin-right: 1em;
+            margin-top: -4px;
+            width: 64px;
+        }
+
+        #icon-book {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            #wrapper {
+                width: 80%;
+                margin: 2em auto;
+            }
+
+            #icon-book {
+                display: inline-block;
+            }
+
+            #status a, #next a {
+                display: block;
+            }
+
+            @-webkit-keyframes fade-in {
+                0% {
+                    opacity: 0;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+            @keyframes fade-in {
+                0% {
+                    opacity: 0;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+            .sf-toolbar {
+                opacity: 0;
+                -webkit-animation: fade-in 1s .2s forwards;
+                animation: fade-in 1s .2s forwards;
+            }
+        }
+    </style>
+{% endblock %}

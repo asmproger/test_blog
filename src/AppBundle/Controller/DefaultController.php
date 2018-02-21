@@ -14,6 +14,17 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
+
+    /**
+     * @Route("/blog-angular", name="blog_angular")
+     * @param Request $request
+     */
+    public function blogaAction(Request $request) {
+        return $this->render('default/angular_blog.html.twig', [
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
+        ]);
+    }
+
     /**
      * @Route("/rest-blog", name="rest_blog")
      * @param Request $request
