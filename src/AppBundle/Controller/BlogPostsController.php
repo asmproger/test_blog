@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\BlogPost;
+use AppBundle\Entity\Image;
 use AppBundle\Utils\CustomMethods;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\UserBundle\Form\Type\ResettingFormType;
@@ -15,24 +16,35 @@ use Doctrine\ORM\QueryBuilder;
 
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Controller\Annotations\Get;
+use FOS\RestBundle\Controller\Annotations\Post;
 use Symfony\Component\HttpFoundation\Response;
 
 use \FOS\RestBundle\View\View as RestView;
-
-
+use Symfony\Component\Serializer\SerializerInterface;
 
 class BlogPostsController extends FOSRestController
 {
-
     /**
-     * @param array $data
+     * create new blogpost item
+     * @POST("/blogs-post")
      */
-    public function postBlogAction(Request $request) {
-        print_r('POST ACTION');
-        die;
+    public function postBlogAction(Request $request)
+    {
+        $data = $request->request->all();
+        $em = $this->getDoctrine()->getManager();
+
+        $image = $em->getRepository(Image::class)->find($data['_image_id']);
+        $post = $em->getRepository(BlogPost::class)->setFromArray($data);
+        $post->setImage($image);
+
+        $em->persist($post);
+        $em->flush();
+
+        return new JsonResponse([], 200);
     }
 
     /**
+     * return enabled blogposts count in db
      * @param int $page
      * @param int $ipp
      * @return \Symfony\Component\HttpFoundation\Response
@@ -50,18 +62,13 @@ class BlogPostsController extends FOSRestController
             ->orderBy('bp.id', 'DESC');
         $query = $builder->getQuery();
 
-        /*if($page && $ipp) {
-            $p = $this->get('knp_paginator');
-            $items = $p->paginate( $query, $page, 10);
-        } else {
-            $items = $query->getResult();
-        }*/
-
         $items = $query->getResult();
         $view = $this->view(['count' => count($items)], 200);
         return $this->handleView($view);
     }
+
     /**
+     * return all enabled blogposts from db
      * @param int $page
      * @param int $ipp
      * @return \Symfony\Component\HttpFoundation\Response
@@ -79,9 +86,9 @@ class BlogPostsController extends FOSRestController
             ->orderBy('bp.id', 'DESC');
         $query = $builder->getQuery();
 
-        if($page && $ipp) {
+        if ($page && $ipp) {
             $p = $this->get('knp_paginator');
-            $items = $p->paginate( $query, $page, 10);
+            $items = $p->paginate($query, $page, 10);
         } else {
             $items = $query->getResult();
         }
@@ -89,7 +96,7 @@ class BlogPostsController extends FOSRestController
         //$items = $query->getResult();
 
         $p = $this->get('knp_paginator');
-        $paginator = $p->paginate( $query, $page, $ipp);
+        $paginator = $p->paginate($query, $page, $ipp);
         $view = $this->view($paginator, 200);
         $view->setTemplate('api/blog_post_all.html.twig');
         $view->setTemplateVar('paginator');
@@ -98,6 +105,7 @@ class BlogPostsController extends FOSRestController
     }
 
     /**
+     * return one blogpost from db
      * @param $id
      * @return \Symfony\Component\HttpFoundation\Response
      */

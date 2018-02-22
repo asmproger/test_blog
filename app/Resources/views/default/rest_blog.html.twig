@@ -80,7 +80,6 @@
             });
         }
 
-
         function showForm() {
             bList.hide();
             bItem.hide();
@@ -99,7 +98,6 @@
             formWrapper.hide();
         }
 
-
         $(document).ready(function () {
             postsWrapper = $('.blogs-list');
             paginationContainer = $('.paginator-wrapper .pagination');
@@ -116,8 +114,7 @@
                 buildPagination();
             });
 
-
-
+            // jq fileuploader
             $('#form_pic').fileupload({
                 url: '{{ path('rest_blog_upload') }}',
                 dataType: 'json',
@@ -145,7 +142,7 @@
             })
         });
 
-        //form submit
+        //form submit, collect data from html and ajax to post action
         $(document).on('click', '#form_submit', function (e) {
             var $form = $(this).closest('form');
             var data = $form.serialize();

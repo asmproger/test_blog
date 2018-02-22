@@ -26,6 +26,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
  */
 class BlogPost
 {
+    private $_image_token;
     const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
      * @ORM\Id
@@ -46,6 +47,8 @@ class BlogPost
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $label;
 
@@ -72,6 +75,8 @@ class BlogPost
 
     /**
      * @ORM\Column(nullable=true)
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $short;
 
@@ -376,5 +381,21 @@ class BlogPost
     public function setUpdated()
     {
         $this->setModifiedDate(new \DateTime());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImageToken()
+    {
+        return $this->_image_token;
+    }
+
+    /**
+     * @param mixed $image_token
+     */
+    public function setImageToken($image_token)
+    {
+        $this->_image_token = $image_token;
     }
 }

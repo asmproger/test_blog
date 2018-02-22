@@ -20,11 +20,32 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class DefaultController extends Controller
 {
+    /**
+     * request to api (hardcoded request to post)
+     * @param array $data
+     */
+    private function request($data = []) {
+        $url = 'http://test_blog.local/app_dev.php/api/v1/blogs-post';
+        $curl = curl_init($url);
+        curl_setopt_array($curl, [
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HEADER => [
+                'Accept' => 'application/json'
+            ]
+        ]);
+        $response = curl_exec($curl);
+        print_r($response);
+        die;
+    }
 
     /**
+     * uploads image and creates new Image row in table. return image_id, image name & token
      * @Route("/upload-image", name="rest_blog_upload")
      */
     public function uploadImageAction(Request $request) {
@@ -78,10 +99,11 @@ class DefaultController extends Controller
     }
 
     /**
+     * ajax blog with rest ajax requests
      * @Route("/rest-blog", name="rest_blog")
      * @param Request $request
      */
-    public function blogAction(Request $request)
+    public function blogAction(Request $request, SerializerInterface $serializer)
     {
         /**
          * @var BlogPost $post
@@ -92,11 +114,27 @@ class DefaultController extends Controller
         $form->handleRequest($request);
         if($form->isSubmitted()) {
             if( $form->isValid()) {
+
+                // test code
+                // development in progress
+                $data = $request->request->all();
+                $data = $data['form'];
+                $this->request($data);
+                die;
+
+
                 $em = $this->getDoctrine()->getManager();
                 $token = $form->get('_image_token')->getData();
                 $image = $em->getRepository(Image::class)->findOneBy(['token' => $token]);
-
                 $post = $form->getData();
+                $post->setImage($image);
+
+                $t = $serializer->serialize($post, 'json');
+                $a = json_decode($t, true);
+                print_r($a);die;
+
+                //print_r($a);
+
                 if($image) {
                     $post->setImage($image);
                     //$image->setToken('');
@@ -142,6 +180,7 @@ class DefaultController extends Controller
         ]);
     }
 
+    // returns form for posting/editing blogpost
     private function getPostForm(BlogPost $post)
     {
         $builder = $this->createFormBuilder($post);
