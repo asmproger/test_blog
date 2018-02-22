@@ -8,6 +8,10 @@ use AppBundle\Service\GoogleParser;
 use Knp\Component\Pager\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
 
@@ -60,5 +64,50 @@ class BlogController extends Controller
         return $this->render('blog/view.html.twig', [
             'item' => $item
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * #Route("/blog-add", name="blog_add")
+     */
+    public function addAction(Request $request)
+    {
+        $post = new BlogPost();
+        $form = $this->getForm($post);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            die('FORM OK');
+        }
+        return $this->render('blog/add.html.twig', [
+            'form' => $form
+        ]);
+    }
+
+    private function getForm(BlogPost $post)
+    {
+        $builder = $this->createFormBuilder($post);
+        $builder
+            ->add('title', TextType::class, [
+                'label' => 'Title',
+                'required' => 1
+            ])
+            ->add('short', TextareaType::class, [
+                'label' => 'Short description',
+                'required' => 1
+            ])
+            ->add('body', TextareaType::class, [
+                'label' => 'Description',
+                'required' => 1
+            ])
+            ->add('pic', FileType::class, [
+                'label' => 'Image:',
+                'required' => false,
+                'data_class' => null
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => $post->getId() ? 'Edit' : 'Add',
+            ]);;
+        return $builder->getForm();
     }
 }
