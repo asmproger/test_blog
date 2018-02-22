@@ -51,13 +51,21 @@
         }
 
         // load selected page from server with REST
-        function loadPage(page) {
+        function loadPage(page, isHref) {
             // dirty hack, will be replaced with bundle
+
             var url = '{{ path("get_blog_all", {"page": "page_id", "ipp": 10 }) }}';
             url = url.replace("page_id", page);
+            if(isHref) {
+                url = page;
+            }
+
             $.ajax({
                 dataType: 'html',
                 url: url,
+                headers: {
+                    'Accept': 'text/html'
+                },
                 beforeSend: function() {
                     postsWrapper.css('opacity', 0.5);
                 },
@@ -75,7 +83,7 @@
 
 
         $(document).ready(function () {
-            postsWrapper = $('#table_content');
+            postsWrapper = $('.blogs-list');
             paginationContainer = $('.paginator-wrapper .pagination');
             // wrapper for posts table
             bList = $('.blogs-list');
@@ -94,9 +102,11 @@
         $(document).on('click', '.pagination a', function (e) {
             var self = $(this);
             var page = parseInt(self.data('page'));
-            if (page !== current_page) {
-                loadPage(page);
-            }
+            var href = self.attr('href');
+            console.log(href);
+            //if (page !== current_page) {
+                loadPage(href, 1);
+            //}
 
             return false;
         });
@@ -142,7 +152,7 @@
             </div>
 
             <div class="blogs-list">
-                <table class="table">
+                {#<table class="table">
                     <thead>
                     <tr>
                         <th></th>
@@ -151,10 +161,10 @@
                     </tr>
                     </thead>
                     <tbody id="table_content">
-                    {# fot ajax content #}
+                    #}{# fot ajax content #}{#
                     </tbody>
                 </table>
-                {% include "partials/rest_blog_pagination.html.twig" %}
+                {% include "partials/rest_blog_pagination.html.twig" %}#}
             </div>
 
             <div class="blog-item" style="display: none;"></div>

@@ -1,15 +1,29 @@
-{% for item in items %}
+<table class="table">
+    <thead>
     <tr>
-        <td>
-            {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
-        </td>
-        <td>
-            <a data-id="{{ item.id }}" class="blog-title" href="javascript://">
-                {{ item.title }}
-            </a>
-        </td>
-        <td>
-            {{ item.short }}
-        </td>
+        <th></th>
+        <th>Title</th>
+        <th>Short</th>
     </tr>
-{% endfor %}
+    </thead>
+    <tbody id="table_content">
+
+        {% for item in paginator %}
+            <tr>
+                <td>
+                    {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
+                </td>
+                <td>
+                    <a data-id="{{ item.id }}" class="blog-title" href="javascript://">
+                        {{ item.title }}
+                    </a>
+                </td>
+                <td>
+                    {{ item.short }}
+                </td>
+            </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+{{ knp_pagination_render(paginator) }}

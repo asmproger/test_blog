@@ -78,9 +78,12 @@ class BlogPostsController extends FOSRestController
         }
 
         //$items = $query->getResult();
-        $view = $this->view($items, 200);
+
+        $p = $this->get('knp_paginator');
+        $paginator = $p->paginate( $query, $page, $ipp);
+        $view = $this->view($paginator, 200);
         $view->setTemplate('api/blog_post_all.html.twig');
-        $view->setTemplateVar('items');
+        $view->setTemplateVar('paginator');
 
         return $this->handleView($view);
     }
