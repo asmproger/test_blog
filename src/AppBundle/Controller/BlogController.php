@@ -4,7 +4,9 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Page;
+use AppBundle\Service\CustomUploader;
 use AppBundle\Service\GoogleParser;
+use AppBundle\Utils\CustomMethods;
 use Knp\Component\Pager\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -68,19 +70,91 @@ class BlogController extends Controller
 
     /**
      * @param Request $request
-     * #Route("/blog-add", name="blog_add")
+     * @Route("/blog-add", name="blog_add")
      */
-    public function addAction(Request $request)
+    public function addAction(Request $request/*, CustomUploader $cU*/)
     {
+        /**
+         * @var BlogPost $post
+         */
         $post = new BlogPost();
         $form = $this->getForm($post);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            die('FORM OK');
+            $em = $this->getDoctrine()->getManager();
+            $post = $form->getData();
+
+            $file = $post->getPic();
+            if ($file) {
+                $newName = md5(time()) . '.' . $file->guessExtension();
+                $file->move($this->getParameter('images_directory'), $newName);
+                $product = $form->getData();
+                $product->setPic($newName);
+            }
+
+            $em->getConnection()->beginTransaction();
+            try {
+
+                $post->setCreatedDate(new \DateTime());
+                $post->setEnabled(1);
+                $post->setHref('http://test_blog.local');
+                $em->persist($post);
+                $em->flush();
+                $em->getConnection()->commit();
+            } catch(\Exception $e) {
+                $em->getConnection()->rollBack();
+                throw $e;
+            }
+
+            return $this->redirectToRoute('blog_index');
         }
         return $this->render('blog/add.html.twig', [
-            'form' => $form
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @route("blog-edit/{id}", name="blog_edit", requirements={"id"="\d+"})
+     */
+    public function editAction(Request $request) {
+        $id = (int)$request->get('id', 0);
+
+        $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
+
+        if(!$post) {
+            throw new \Exception('Post not found');
+        }
+
+        $form = $this->getForm($post);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+
+            $file = $post->getPic();
+            if($file) {
+                $newName = md5(time()) . '.' . $file->guessExtension();
+                $file->move($this->getParameter('images_directory'), $newName);
+                $post = $form->getData();
+                $post->setPic($newName);
+            }
+
+            $em = $this->getDoctrine()->getManager();
+            $em->getConnection()->beginTransaction();
+            try {
+                $em->persist($post);
+                $em->flush();
+                $em->getConnection()->commit();
+            } catch (\Exception $e) {
+                $em->getConnection()->rollback();
+                throw $e;
+            }
+
+        }
+
+        return $this->render('blog/add.html.twig', [
+            'form' => $form->createView()
         ]);
     }
 

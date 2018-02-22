@@ -7,33 +7,34 @@
             <div class="text-center">
                 <a class="btn btn-danger" href="javascript://" onclick="history.back()">Back</a>
             </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Title</th>
-                        <th>Short</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in paginator %}
-                        <tr>
-                            <td>
-                                {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
-                            </td>
-                            <td>
-                                <a href="{{ path('blog_view', {'id': item.id}) }}">
-                                    {{ item.title }}
-                                </a>
-                            </td>
-                            <td>
-                                {{ item.short }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {{ knp_pagination_render(paginator) }}
+
+            {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.title) }}
+                    {{ form_widget(form.title, {'attr' : {'class': 'form-control'}}) }}
+                    <p class="help-block">{{ form_errors(form.title) }}</p>
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.short) }}
+                    {{ form_widget(form.short, {'attr' : {'class': 'form-control'}}) }}
+                    <p class="help-block">{{ form_errors(form.short) }}</p>
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.body) }}
+                    {{ form_widget(form.body, {'attr' : {'class': 'form-control'}}) }}
+                    <p class="help-block">{{ form_errors(form.body) }}</p>
+                </div>
+                <div class="form-group">
+                    {{ form_widget(form.pic, {'attr' : {'class': 'form-control'}}) }}
+                    <p class="help-block">{{ form_errors(form.pic) }}</p>
+                    <img style="display: none;" onload="$(this).show();" class="product-image-preview" src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
+                </div>
+                <div class="form-group text-right">
+                    {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href="" onclick="history.back(); return false;">cancel</a>
+                </div>
+            {{ form_end(form) }}
+
+
         </div>
     </div>
 {% endblock %}

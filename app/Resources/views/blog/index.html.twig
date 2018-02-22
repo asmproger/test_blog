@@ -4,7 +4,7 @@
         <div id="container">
             {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
 
-            <div class="text-center">
+            <div class="text-right">
                 <a class="btn btn-primary" href="{{ path('blog_add') }}">Add</a>
             </div>
             <table class="table">
@@ -19,7 +19,9 @@
                     {% for item in paginator %}
                         <tr>
                             <td>
-                                {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
+                                <a href="{{ path('blog_edit', {'id' : item.id}) }}">
+                                    {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
+                                </a>
                             </td>
                             <td>
                                 <a href="{{ path('blog_view', {'id': item.id}) }}">
