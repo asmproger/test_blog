@@ -49,24 +49,6 @@ class BlogController extends Controller
     }
 
     /**
-     * @param Request $request
-     * #Route("/blog-add", name="blog_add")
-     */
-    public function addAction(Request $request)
-    {
-        $post = new BlogPost();
-        $form = $this->getForm($post);
-        $form->handleRequest($request);
-
-        if($form->isSubmitted() && $form->isValid()) {
-            die('FORM OK');
-        }
-        return $this->render('blog/add.html.twig', [
-            'form' => $form
-        ]);
-    }
-
-    /**
      * @Route("/blog-post/{id}", name="blog_view", requirements={"id"="\d+"})
      */
     public function pageAction(Request $request)
@@ -84,30 +66,4 @@ class BlogController extends Controller
         ]);
     }
 
-    private function getForm(BlogPost $post) {
-        $builder = $this->createFormBuilder($post);
-        $builder
-            ->add('title', TextType::class, [
-                'label' => 'Title',
-                'required' => 1
-            ])
-            ->add('short', TextareaType::class, [
-                'label' => 'Short description',
-                'required' => 1
-            ])
-            ->add('body', TextareaType::class, [
-                'label' => 'Description',
-                'required' => 1
-            ])
-            ->add('pic', FileType::class, [
-                'label' => 'Image:',
-                'required' => false,
-                'data_class' => null
-            ])
-            ->add('submit', SubmitType::class, [
-                'label' => $post->getId() ? 'Edit' : 'Add',
-            ]);
-        ;
-        return $builder->getForm();
-    }
 }
