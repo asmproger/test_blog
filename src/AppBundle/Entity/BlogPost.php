@@ -14,6 +14,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Groups;
+
+use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
 /**
  * Model for blog posts
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
@@ -37,6 +40,7 @@ class BlogPost
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"blog_post"})
      * @Expose
+     * @Assert\NotBlank()
      */
     private $title;
 
@@ -75,6 +79,7 @@ class BlogPost
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"blog_post"})
      * @Expose
+     * @Assert\NotBlank()
      */
     private $body;
 
@@ -84,6 +89,36 @@ class BlogPost
      * @Expose
      */
     private $pic;
+
+    /**
+     * @OneToOne(targetEntity="Image")
+     * @JoinColumn(name="image_id", referencedColumnName="id")
+     */
+    private $image;
+
+    /**
+     * @return mixed
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function getImageName() {
+        /**
+         * @var Image $image
+         */
+        $image = $this->getImage();
+        return $image->getPath();
+    }
+
+    /**
+     * @param mixed $image
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+    }
 
     /**
      * @return mixed

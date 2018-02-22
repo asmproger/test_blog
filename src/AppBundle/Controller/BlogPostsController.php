@@ -23,6 +23,15 @@ use \FOS\RestBundle\View\View as RestView;
 
 class BlogPostsController extends FOSRestController
 {
+
+    /**
+     * @param array $data
+     */
+    public function postBlogAction(Request $request) {
+        print_r('POST ACTION');
+        die;
+    }
+
     /**
      * @param int $page
      * @param int $ipp

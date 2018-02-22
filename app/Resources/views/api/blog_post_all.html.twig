@@ -11,7 +11,13 @@
         {% for item in paginator %}
             <tr>
                 <td>
-                    {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
+                    {% set image = item.getImage %}
+                    {% if image %}
+                        {% set src = image.getPath %}
+                    {% else %}
+                        {% set src = item.pic %}
+                    {% endif %}
+                    {% include 'partials/image_view.html.twig' with {'src' : src} %}
                 </td>
                 <td>
                     <a data-id="{{ item.id }}" class="blog-title" href="javascript://">
