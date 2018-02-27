@@ -133,6 +133,7 @@ class BlogPost
     public function getPic()
     {
         $image = $this->getImage();
+        //die(gettype($image));
         return !empty($image) ? $image->getPath() : $this->pic;
     }
 

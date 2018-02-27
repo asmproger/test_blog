@@ -254,6 +254,7 @@
         //form submit, collect data from html and ajax to post action
         $(document).on('click', '#form_submit', function (e) {
             var $form = $(this).closest('form');
+            var data = $form.serialize();
             var controls = $form.find(':input');
 
             //collect form data for api
@@ -271,7 +272,7 @@
 
             $.ajax({
                 url: url,
-                data: obj,
+                data: data,
                 type: type,
                 dataType: 'json',
                 beforeSend: function () {
@@ -279,6 +280,8 @@
                 },
                 success: function (response, textStatus, xhr) {
                     if (response.status) {
+                        console.log(response);
+                        return;
                         updatePagesCount(function () {
                             loadPage(1);
                             buildPagination();

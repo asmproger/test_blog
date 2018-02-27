@@ -12,6 +12,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
@@ -90,6 +94,55 @@ class BlogPostsController extends FOSRestController
      */
     public function postBlogAction(Request $request)
     {
+        $post = new BlogPost();
+        $form = $this->getForm($post);
+
+        $form->handleRequest($request);
+        if($form->isSubmitted()) {
+            if($form->isValid()) {
+                $post = $form->getData();
+                $post->setCreatedDate(new \DateTime());
+                $post->setEnabled(1);
+                $post->setHref('http://test_blog.local');
+
+                $data = $form->getExtraData();
+                $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
+
+                $image = $this->getDoctrine()->getRepository(Image::class)->find($image_id);
+                if($image) {
+                    $post->setImage($image);
+                    $image->setToken('');
+                }
+
+                $em = $this->getDoctrine()->getManager();
+                $em->getConnection()->beginTransaction();
+                try {
+                    $em->persist($image);
+                    $em->persist($post);
+                    $em->flush();
+                    $em->getConnection()->commit();
+
+                    return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
+                } catch (\Exception $e) {
+                    $em->getConnection()->rollback();
+                    return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
+                }
+            } else {
+                $errs = [];
+                $errors = $form->getErrors(true, true);
+                //print_r($errors->count()); die;
+                foreach($errors as $err) {
+                    $errs[] = [
+                        'element' => $err->getOrigin()->getName(),
+                        'error' => $err->getMessage()
+                    ];
+                }
+                return new JsonResponse(['status' => false, 'code' => 400, 'message' => 'Invalid data', 'errors' => $errs], 400);
+            }
+        }
+        return;
+        die('wtf');
+
         $data = $request->request->all();
 
         $em = $this->getDoctrine()->getManager();
@@ -193,5 +246,32 @@ class BlogPostsController extends FOSRestController
         $view->setTemplate('api/blog_post.html.twig');
         $view->setTemplateVar('item');
         return $this->handleView($view);
+    }
+
+    private function getForm(BlogPost $post)
+    {
+        $builder = $this->createFormBuilder($post, ['allow_extra_fields' => 1]);
+        $builder
+            ->add('title', TextType::class, [
+                'label' => 'Title',
+                'required' => 1
+            ])
+            ->add('short', TextareaType::class, [
+                'label' => 'Short description',
+                'required' => 1
+            ])
+            ->add('body', TextareaType::class, [
+                'label' => 'Description',
+                'required' => 1
+            ])
+            ->add('pic', FileType::class, [
+                'label' => 'Image:',
+                'required' => false,
+                'data_class' => null
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => $post->getId() ? 'Edit' : 'Add',
+            ]);;
+        return $builder->getForm();
     }
 }
