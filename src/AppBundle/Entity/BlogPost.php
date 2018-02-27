@@ -17,6 +17,7 @@ use JMS\Serializer\Annotation\Groups;
 
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
+
 /**
  * Model for blog posts
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
@@ -109,7 +110,8 @@ class BlogPost
         return $this->image;
     }
 
-    public function getImageName() {
+    public function getImageName()
+    {
         /**
          * @var Image $image
          */
@@ -130,7 +132,8 @@ class BlogPost
      */
     public function getPic()
     {
-        return $this->pic;
+        $image = $this->getImage();
+        return !empty($image) ? $image->getPath() : $this->pic;
     }
 
     /**
@@ -397,5 +400,24 @@ class BlogPost
     public function setImageToken($image_token)
     {
         $this->_image_token = $image_token;
+    }
+
+    /**
+     * set model fields from array
+     * @param array $data
+     */
+    public function setFromArray($data = [])
+    {
+
+        foreach ($data as $k => $v) {
+            if (strpos($k, '_') === 0 && strpos($k, 'image') !== false) {
+                continue;
+            }
+            $method = 'set' . ucfirst($k);
+            if (method_exists($this, $method)) {
+                $this->$method($v);
+            }
+        }
+
     }
 }

@@ -9,6 +9,8 @@ use FOS\RestBundle\Controller\FOSRestController;
 use FOS\UserBundle\Form\Type\ResettingFormType;
 use Knp\Component\Pager\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,25 +26,93 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class BlogPostsController extends FOSRestController
 {
+
     /**
-     * create new blogpost item
-     * @POST("/blog", name="blog_post")
+     * delete blog post from db
+     * @param $id
+     */
+    public function deleteBlogAction($id) {
+        $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
+        if(!$id || !$post) {
+            return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
+        }
+        $em = $this->getDoctrine()->getManager();
+        $em->getConnection()->beginTransaction();
+        try {
+            $em->remove($post);
+            $em->flush();
+            $em->getConnection()->commit();
+        } catch (\Exception $e) {
+            $em->getConnection()->rollback();
+            return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
+        }
+        return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
+    }
+    /**
+     * update existing blogpost item
+     */
+    public function putBlogAction(Request $request)
+    {
+        $data = $request->request->all();
+
+        $id = $data['id'];
+        $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
+
+        if(!$id || !$post) {
+            return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+        $post->setFromArray($data);
+
+        $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
+        if($image_id) {
+            $image = $em->getRepository(Image::class)->find($data['_image_id']);
+            $post->setImage($image);
+        }
+
+        $em->getConnection()->beginTransaction();
+        try {
+            $em->persist($post);
+            $em->flush();
+            $em->getConnection()->commit();
+        } catch (\Exception $e) {
+            $em->getConnection()->rollback();
+            return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
+        }
+
+        return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
+    }
+
+    /**
+     * create new blogpost item or update exist
      */
     public function postBlogAction(Request $request)
     {
         $data = $request->request->all();
-        $em = $this->getDoctrine()->getManager();
 
-        $image = $em->getRepository(Image::class)->find($data['_image_id']);
+        $em = $this->getDoctrine()->getManager();
 
         $post = $em->getRepository(BlogPost::class)->setFromArray($data);
 
-        $post->setImage($image);
+        $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
+        if($image_id) {
+            $image = $em->getRepository(Image::class)->find($data['_image_id']);
+            $post->setImage($image);
+        }
 
-        $em->persist($post);
-        $em->flush();
+        $em->getConnection()->beginTransaction();
+        try {
+            $em->persist($post);
+            $em->flush();
+            $em->getConnection()->commit();
+        } catch (\Exception $e) {
+            $em->getConnection()->rollback();
+            return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
+        }
 
-        return new JsonResponse([], 200);
+        return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
     }
 
     /**
@@ -118,6 +188,7 @@ class BlogPostsController extends FOSRestController
         if (!$item instanceof BlogPost) {
             throw new \Exception('Post not found');
         }
+
         $view = $this->view($item, 200);
         $view->setTemplate('api/blog_post.html.twig');
         $view->setTemplateVar('item');

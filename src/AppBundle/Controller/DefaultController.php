@@ -26,11 +26,17 @@ class DefaultController extends Controller
 {
     /**
      * request to api (hardcoded request to post)
+     * @Route("/blog", name="post_blog")
      * @param array $data
      */
-    private function request($data = []) {
-        $url = 'http://test_blog.local/app_dev.php/api/v1/blogs-post';
+    private function request($data = [], $type = 'POST') {
+        $url = 'http://test_blog.local/app_dev.php/api/v1/blog';
         $curl = curl_init($url);
+
+        /*$type = 'POST';
+        $type = mb_strtoupper($type);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);*/
+
         curl_setopt_array($curl, [
             CURLOPT_POST => 1,
             CURLOPT_POSTFIELDS => $data,
@@ -40,6 +46,7 @@ class DefaultController extends Controller
             ]
         ]);
         $response = curl_exec($curl);
+        print_r([$url]);
         print_r($response);
         die;
     }
@@ -103,61 +110,40 @@ class DefaultController extends Controller
      * @Route("/rest-blog", name="rest_blog")
      * @param Request $request
      */
+    //requirements={"id"="\d+"}, defaults={"id"=0}
     public function blogAction(Request $request, SerializerInterface $serializer)
     {
         /**
          * @var BlogPost $post
          */
+        /*$post = null;
+        $method = 'POST';
+        //$data = $request->request->all();
+        $id = $request->request->get('form[id]', 0);
+        if($id) {
+            $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
+            $method = 'PUT';
+        }
+        if(!$post) {
+            $post = new BlogPost();
+            $method = 'POST';
+        }*/
+
         $post = new BlogPost();
         $form = $this->getPostForm($post);
 
         $form->handleRequest($request);
         if($form->isSubmitted()) {
             if( $form->isValid()) {
-
-                // test code
-                // development in progress
+                // test code, development in progress
                 $data = $request->request->all();
                 $data = $data['form'];
-                $this->request($data);
-                die;
-
-
-                $em = $this->getDoctrine()->getManager();
-                $token = $form->get('_image_token')->getData();
-                $image = $em->getRepository(Image::class)->findOneBy(['token' => $token]);
-                $post = $form->getData();
-                $post->setImage($image);
-
-                $t = $serializer->serialize($post, 'json');
-                $a = json_decode($t, true);
-                print_r($a);die;
-
-                //print_r($a);
-
-                if($image) {
-                    $post->setImage($image);
-                    //$image->setToken('');
+                if(isset($data['id']) && !empty($data['id'])) {
+                    $type = 'PUT';
+                } else {
+                    $type = 'POST';
                 }
-
-                $post->setCreatedDate(new \DateTime());
-                $post->setEnabled(1);
-                $post->setHref('http://test_blog.local');
-
-                $em->getConnection()->beginTransaction();
-                try {
-                    $em->persist($post);
-                    //$em->persist($image);
-                    $em->flush();
-                    $em->getConnection()->commit();
-
-                    return new JsonResponse(['status' => true]);
-
-                } catch (\Exception $e) {
-                    $em->getConnection()->rollback();
-                    throw $e;
-                }
-
+                $this->request($data, $type);
                 die;
             } else {
                 $errs = [];
@@ -208,6 +194,9 @@ class DefaultController extends Controller
             ])
             ->add('submit', SubmitType::class, [
                 'label' => $post->getId() ? 'Edit' : 'Add'
+            ])
+            ->add('id', HiddenType::class, [
+                'mapped' => false
             ])
         ;
         return $builder->getForm();

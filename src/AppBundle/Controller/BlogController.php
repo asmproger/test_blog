@@ -77,7 +77,18 @@ class BlogController extends Controller
         /**
          * @var BlogPost $post
          */
-        $post = new BlogPost();
+        $post = null;
+        $method = 'POST';
+        $id = $request->request->get('id', 0);
+        if($id) {
+            $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
+            $method = 'PUT';
+        }
+        if(!$post) {
+            $post = new BlogPost();
+            $method = 'POST';
+        }
+
         $form = $this->getForm($post);
         $form->handleRequest($request);
 

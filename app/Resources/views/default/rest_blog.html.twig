@@ -18,6 +18,7 @@
             if (pages <= 1) {
                 return;
             }
+            var tmp = paginationContainer.find('.prev');
             for (var i = 1; i <= pages; i++) {
                 var $item = $('<li></li>');
                 var $span = $('<span></span>');
@@ -27,7 +28,8 @@
                 if (i === 1) {
                     $item.addClass('active');
                 }
-                paginationContainer.append($item);
+                tmp.after($item);
+                tmp = $item;
             }
         }
 
@@ -60,42 +62,69 @@
             }
 
             $.ajax({
-                dataType: 'html',
+                dataType: 'json',
                 url: url,
                 headers: {
-                    'Accept': 'text/html'
+                    //'Accept': 'text/html'
+                    'Accept': 'application/json'
                 },
                 beforeSend: function () {
-                    postsWrapper.css('opacity', 0.5);
+                    
                 },
-                success: function (html, statusText, obj) {
-                    current_page = page;
-
-                    postsWrapper.html(html);
-                    postsWrapper.css('opacity', 1);
+                success: function (data, statusText, obj) {
+                    buildContent(data);
 
                     // update active page on paginator
                     updatePagination();
+                    showList();
+                    
                 }
             });
         }
 
-        function showForm() {
+        // create html for json data from api
+        function buildContent(data) {
+            current_page = data.current_page_number;
+            var target = table.find('tbody');
+            target.empty();
+            for (var i in data.items) {
+                var item = data.items[i];
+                var tr = $('<tr></tr>');
+                tr.data('id', item.id);
+                var td1 = $('<td><img style="display: none;" onload="$(this).show();" width="150" src="/uploads/images/' + item.pic + '" /></td>');
+                var td2 = $('<td>' + item.title + '</td>');
+                var td3 = $('<td>' + item.short + '</td>');
+                var td4 = $('<td><a class="blog-edit-ajax" href="javascript://">edit</a> <a class="blog-delete-ajax" href="javascript://">delete</a></td>');
+                tr.append(td1);
+                tr.append(td2);
+                tr.append(td3);
+                tr.append(td4);
+
+                target.append(tr);
+            }
+
+        }
+
+        /// hide everything and show form only
+        function showForm(isEdit) {
             bList.hide();
             bItem.hide();
             formWrapper.show();
+
+            // change submit btn title if needed
+            if (isEdit) {
+                formWrapper.find('.btn-primary').html('Save');
+            } else {
+                formWrapper.find('.btn-primary').html('Add');
+            }
         }
 
+        // hide everything and show posts list
         function showList() {
             bList.show();
             bItem.hide();
             formWrapper.hide();
-        }
-
-        function showItem() {
-            bList.hide();
-            bItem.show();
-            formWrapper.hide();
+            isEdit = false;
         }
 
         $(document).ready(function () {
@@ -108,6 +137,8 @@
             // wrapper for add/edit form
             formWrapper = $('.post-form');
 
+            table = bList.find('table');
+
             // let's get pages count from server and build paginator
             updatePagesCount(function () {
                 loadPage(1);
@@ -119,7 +150,7 @@
                 url: '{{ path('rest_blog_upload') }}',
                 dataType: 'json',
                 done: function (e, data) {
-                    if(data.result.status) {
+                    if (data.result.status) {
                         $('#form_image').css('width', '150px');
                         $('#form_image').attr('src', '/uploads/images/' + data.result.data.image);
                         $('#form_image').show();
@@ -142,31 +173,123 @@
             })
         });
 
+        var isEdit = false;
+
+        // remove post from api
+        $(document).on('click', '.blog-delete-ajax', function () {
+            if (!confirm('Are you shure?')) {
+                return;
+            }
+            isEdit = true;
+            var self = $(this);
+            var id = parseInt(self.closest('tr').data('id'));
+            if (!id) {
+                return;
+            }
+            // dirty hack, will be replaced with bundle
+            var url = '{{ path("delete_blog", {"id": "id" }) }}';
+            url = url.replace("id", id);
+            $.ajax({
+                url: url,
+                type: 'delete',
+                dataType: 'json',
+                beforeSend: function () {
+                    
+                },
+                success: function (response) {
+                    updatePagesCount(function () {
+                        loadPage(1);
+                        buildPagination();
+                    });
+                }
+            });
+        });
+
+        // edit labelclick handler
+        $(document).on('click', '.blog-edit-ajax', function () {
+            isEdit = true;
+            var self = $(this);
+            var id = parseInt(self.closest('tr').data('id'));
+            if (!id) {
+                return;
+            }
+            // dirty hack, will be replaced with bundle
+            var url = '{{ path("get_blog", {"id": "id" }) }}';
+            url = url.replace("id", id);
+            $.ajax({
+                url: url,
+                type: 'get',
+                dataType: 'json',
+                success: function (response) {
+                    showEditForm(response);
+                    
+                }
+            });
+        });
+
+        function showEditForm(data) {
+            showForm(1);
+            fillForm(data);
+        }
+
+        // fill form with data from api
+        function fillForm(data) {
+            var keys = Object.getOwnPropertyNames(data);
+            for (var i in keys) {
+                var key = keys[i];
+                var value = data[key];
+
+                var el = formWrapper.find('#form_' + key);
+                if (el.length) {
+                    el.val(value);
+                }
+
+                if ('pic' === key && value) {
+                    $('#form_image').attr('src', '/uploads/images/' + value);
+                    $('#form_image').show();
+                }
+            }
+        }
+
         //form submit, collect data from html and ajax to post action
         $(document).on('click', '#form_submit', function (e) {
             var $form = $(this).closest('form');
-            var data = $form.serialize();
+            var controls = $form.find(':input');
+
+            //collect form data for api
+            var obj = {};
+            $.each(controls, function (k, v) {
+                var el = $(v);
+                var name = el.attr('name').replace('form[', '');
+                name = name.replace(']', '');
+                // we need name-value pairs for our api
+                obj[name] = el.val();
+            });
+
+            var url = isEdit ? '{{ path("put_blog") }}' : '{{ path("post_blog") }}';
+            var type = isEdit ? 'PUT' : 'POST';
+
             $.ajax({
-                url: '{{ path('rest_blog') }}',
-                data: data,
-                type: 'post',
+                url: url,
+                data: obj,
+                type: type,
                 dataType: 'json',
-                success: function (response) {
-                    console.log(response);
+                beforeSend: function () {
+                    
+                },
+                success: function (response, textStatus, xhr) {
                     if (response.status) {
-                        $form.find('p.help-block').html('');
+                        updatePagesCount(function () {
+                            loadPage(1);
+                            buildPagination();
+                        });
                     } else {
-                        if (response.errs) {
-                            for (var i in response.errs) {
-                                var err = response.errs[i];
-                                var el = $('#form_' + err.element);
-                                $('#form_' + err.element).closest('div').find('p.help-block').html(err.error);
-                            }
-                        }
+                        alert('err');
                     }
+                    
                 },
                 fail: function (resposne) {
-
+                    
                 }
             });
             return false;
@@ -175,13 +298,25 @@
         // for paginator links
         $(document).on('click', '.pagination a', function (e) {
             var self = $(this);
-            var page = parseInt(self.data('page'));
-            var href = self.attr('href');
-            console.log(href);
-            //if (page !== current_page) {
-            loadPage(href, 1);
-            //}
-
+            var page = 1;
+            var _class = self.closest('li').attr('class');
+            switch (_class) {
+                case 'first':
+                    page = 1;
+                    break;
+                case 'prev':
+                    page = (current_page > 0) ? --current_page : 1;
+                    break;
+                case 'next':
+                    page = (current_page < pages) ? ++current_page : pages;
+                    break;
+                case 'last':
+                    page = pages;
+                    break;
+                default:
+                    page = parseInt(self.data('page'));
+            }
+            loadPage(page);
             return false;
         });
 
@@ -195,7 +330,7 @@
         // lets view single item
         $(document).on('click', '.blog-title', function () {
             var self = $(this);
-            var id = self.data('id');
+            var id = self.closest('tr').data('id');
             // dirty hack, will be replaced with bundle
             var url = '{{ path("get_blog", {"id": "id" }) }}';
             url = url.replace("id", id);
@@ -206,16 +341,25 @@
                 headers: {
                     'Accept': '*/*'
                 },
-                beforeSend: function (request) {
-                    postsWrapper.css('opacity', 0.5);
+                beforeSend: function () {
+                    
                 },
                 success: function (html, statusText, obj) {
                     bItem.html(html);
                     bList.hide();
                     bItem.show();
-                    postsWrapper.css('opacity', 1);
+                    
                 }
             });
+        });
+
+        // show loader before send ajax
+        $(document).ajaxSend(function() {
+            $('.some-wrapper').css('opacity', 0.5);
+        });
+        // hide laoder after ajax
+        $(document).ajaxComplete(function() {
+            $('.some-wrapper').css('opacity', 1);
         });
     </script>
     <div id="wrapper">
@@ -228,41 +372,58 @@
                 <h1><span>REST AJAX BLOG</span></h1>
             </div>
 
-            <div class="blogs-list">
-                {# fot ajax content #}
-            </div>
+            <div class="some-wrapper">
+                <div class="blogs-list">
 
-            <div class="blog-item" style="display: none;"></div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Title</th>
+                            <th>Short</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="table_content">
+                        {# fot ajax content #}
+                        </tbody>
+                    </table>
+                    {% include 'partials/rest_blog_pagination.html.twig' %}
+                </div>
 
-            <div class="post-form" style="display: none">
-                <a href="javascript://" onclick="showList()">Back to list</a>
-                {{ form_start(form, {'attr' : {'class': 'blogpost-form'}}) }}
-                <div class="form-group">
-                    {{ form_label(form.title) }}
-                    {{ form_widget(form.title, {'attr' : {'class': 'form-control'}}) }}
-                    <p class="help-block">{{ form_errors(form.title) }}</p>
+                <div class="blog-item" style="display: none;"></div>
+
+                <div class="post-form" style="display: none">
+                    <a href="javascript://" onclick="showList()">Back to list</a>
+                    {{ form_start(form, {'attr' : {'class': 'blogpost-form'}}) }}
+                    <div class="form-group">
+                        {{ form_label(form.title) }}
+                        {{ form_widget(form.title, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.title) }}</p>
+                    </div>
+                    <div class="form-group">
+                        {{ form_label(form.short) }}
+                        {{ form_widget(form.short, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.short) }}</p>
+                    </div>
+                    <div class="form-group">
+                        {{ form_label(form.body) }}
+                        {{ form_widget(form.body, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.body) }}</p>
+                    </div>
+                    <div class="form-group">
+                        {{ form_widget(form.pic, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.pic) }}</p>
+                        <img id="form_image" style="display: none;" onload="$(this).show();"
+                             class="product-image-preview"
+                             src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
+                    </div>
+                    <div class="form-group text-right">
+                        {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href=""
+                                                                                                      onclick="history.back(); return false;">cancel</a>
+                    </div>
+                    {{ form_end(form) }}
                 </div>
-                <div class="form-group">
-                    {{ form_label(form.short) }}
-                    {{ form_widget(form.short, {'attr' : {'class': 'form-control'}}) }}
-                    <p class="help-block">{{ form_errors(form.short) }}</p>
-                </div>
-                <div class="form-group">
-                    {{ form_label(form.body) }}
-                    {{ form_widget(form.body, {'attr' : {'class': 'form-control'}}) }}
-                    <p class="help-block">{{ form_errors(form.body) }}</p>
-                </div>
-                <div class="form-group">
-                    {{ form_widget(form.pic, {'attr' : {'class': 'form-control'}}) }}
-                    <p class="help-block">{{ form_errors(form.pic) }}</p>
-                    <img id="form_image" style="display: none;" onload="$(this).show();" class="product-image-preview"
-                         src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
-                </div>
-                <div class="form-group text-right">
-                    {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href=""
-                                                                                                  onclick="history.back(); return false;">cancel</a>
-                </div>
-                {{ form_end(form) }}
             </div>
 
         </div>
