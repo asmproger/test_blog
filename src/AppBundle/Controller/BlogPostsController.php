@@ -26,7 +26,7 @@ class BlogPostsController extends FOSRestController
 {
     /**
      * create new blogpost item
-     * @POST("/blogs-post")
+     * @POST("/blog", name="blog_post")
      */
     public function postBlogAction(Request $request)
     {
@@ -34,7 +34,9 @@ class BlogPostsController extends FOSRestController
         $em = $this->getDoctrine()->getManager();
 
         $image = $em->getRepository(Image::class)->find($data['_image_id']);
+
         $post = $em->getRepository(BlogPost::class)->setFromArray($data);
+
         $post->setImage($image);
 
         $em->persist($post);
