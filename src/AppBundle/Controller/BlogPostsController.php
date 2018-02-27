@@ -12,6 +12,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
@@ -31,11 +35,14 @@ class BlogPostsController extends FOSRestController
      * delete blog post from db
      * @param $id
      */
-    public function deleteBlogAction($id) {
+    public function deleteBlogAction($id)
+    {
         $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
-        if(!$id || !$post) {
+
+        if (!$id || !$post) {
             return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
         }
+
         $em = $this->getDoctrine()->getManager();
         $em->getConnection()->beginTransaction();
         try {
@@ -48,6 +55,7 @@ class BlogPostsController extends FOSRestController
         }
         return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
     }
+
     /**
      * update existing blogpost item
      */
@@ -58,7 +66,7 @@ class BlogPostsController extends FOSRestController
         $id = $data['id'];
         $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
 
-        if(!$id || !$post) {
+        if (!$id || !$post) {
             return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
         }
 
@@ -67,7 +75,7 @@ class BlogPostsController extends FOSRestController
         $post->setFromArray($data);
 
         $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
-        if($image_id) {
+        if ($image_id) {
             $image = $em->getRepository(Image::class)->find($data['_image_id']);
             $post->setImage($image);
         }
@@ -97,7 +105,7 @@ class BlogPostsController extends FOSRestController
         $post = $em->getRepository(BlogPost::class)->setFromArray($data);
 
         $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
-        if($image_id) {
+        if ($image_id) {
             $image = $em->getRepository(Image::class)->find($data['_image_id']);
             $post->setImage($image);
         }

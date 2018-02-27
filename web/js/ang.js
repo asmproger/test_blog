@@ -2,6 +2,7 @@
 var apiUrl = 'http://test_blog.local/app_dev.php/api/v1/';
 var ipp = 10;
 var currentPage = 123;
+var postsList = [];
 //new angular app
 var app = angular.module('blogApp', [
         'ngRoute'
@@ -21,21 +22,75 @@ var app = angular.module('blogApp', [
                 .when('/posts/:id', {
                     template: '<post-detail></post-detail>'
                 })
+                .when('/post/:id', {
+                    template: '<post-form></post-form>'
+                })
                 .otherwise('/posts');
         })
 ;
+
+// component for add/edit new post
+var component = app.component('postForm', {
+    //template: 'OK, BRO',
+    templateUrl: '../form.html', // using templateurl beacouse of routing, i can't do this another way
+    controller: ['$routeParams', '$scope', '$http', function PostsListController($routeParams, $scope, $http) {
+
+        $scope.delete_post = function(id) {
+            $http.delete(apiUrl + 'blogs/' + id, {'Accept': 'application/json'}).then(function (response) {
+                for(var i in $scope.items) {
+                    var item = $scope.items[i];
+                    if(item.id == id) {
+                        $scope.items.splice(i, 1);
+                    }
+                }
+            }, function (response) {
+                alert('err');
+            });
+        };
+
+
+        var self = this;
+        var page = $routeParams.hasOwnProperty('page') ? $routeParams.page : 1;
+        var ipp = $routeParams.hasOwnProperty('ipp') ? $routeParams.ipp : 10;
+
+        currentPage = page;
+        // i don't know hot to use here symfony routes %) it's api calls, ok?
+        $http.get(apiUrl + 'blogs/' + page + '/' + ipp, {'Accept': 'application/json'}).then(function (response) {
+            $scope.items = response.data.items;
+            self.items = response.data.items;
+            /*console.clear();
+            console.log('Response here');
+            console.log(response.data);*/
+        }, function (response) {
+            alert('err');
+        });
+    }]
+});
 
 // component for posts list
 var component = app.component('postsList', {
     //template: 'OK, BRO',
     templateUrl: '../test.template.html', // using templateurl beacouse of routing, i can't do this another way
     controller: ['$routeParams', '$scope', '$http', function PostsListController($routeParams, $scope, $http) {
+
+        $scope.delete_post = function(id) {
+            $http.delete(apiUrl + 'blogs/' + id, {'Accept': 'application/json'}).then(function (response) {
+                for(var i in $scope.items) {
+                    var item = $scope.items[i];
+                    if(item.id == id) {
+                        $scope.items.splice(i, 1);
+                    }
+                }
+            }, function (response) {
+                alert('err');
+            });
+        };
+
+
         var self = this;
-        this.test = 'OK';
         var page = $routeParams.hasOwnProperty('page') ? $routeParams.page : 1;
         var ipp = $routeParams.hasOwnProperty('ipp') ? $routeParams.ipp : 10;
-        console.log($routeParams.page + '_' + $routeParams.ipp);
-        console.log(page + '_' + ipp);
+
         currentPage = page;
         // i don't know hot to use here symfony routes %) it's api calls, ok?
         $http.get(apiUrl + 'blogs/' + page + '/' + ipp, {'Accept': 'application/json'}).then(function (response) {
@@ -56,7 +111,7 @@ var component_detail = app.component('postDetail', {
     templateUrl: '../post.html',
     controller: ['$routeParams', '$http', function PostDetailController($routeParams, $http) {
         this.id = $routeParams.id;
-        console.log($routeParams);
+
         var self = this;
         this.test = 'OK';
         $http({
@@ -72,13 +127,13 @@ var component_detail = app.component('postDetail', {
             self.item = response.data;
         }, function (response) {
             alert('err');
-            console.log(arguments);
+
         });
         /*$http.get(apiUrl + 'blogs/' + this.id, {'Accept': 'application/json'}).then(function (response) {
             self.item = response.data;
         }, function (response) {
             alert('err');
-            console.log(arguments);
+
         });*/
     }]
 });
@@ -107,7 +162,6 @@ var component_paginator = app.component('customPag', {
                     href: /*apiUrl + */'posts/' + (i + 1) + '/' + ipp
                 };
             }
-            console.log(self.pages_links);
             self.item = response.data;
         }, function (response) {
             alert('err');
@@ -121,49 +175,3 @@ var component_paginator = app.component('customPag', {
         });*/
     }]
 });
-
-// component_detail.controller('PostDetailController', function ($http, $routeParams) {
-//     alert('e');
-//     this.phoneId = $routeParams.phoneId;
-//     var self = this;
-//     this.test = 'OK';
-//     $scope.test = 'OK';
-//     $http.get('http://test_blog.local/app_dev.php/api/v1/blogs/637', {'Accept':'application/json'}).then(function(response) {
-//         alert('blog resp');
-//         console.clear();
-//         console.log('Blog resp here');
-//         console.log(response);
-//         /*$scope.items = response.data.items;
-//         self.items = response.data.items;
-//         console.clear();
-//         console.log('Response here');
-//         console.log(response.data);*/
-//     }, function (response) {
-//         alert('err');
-//     });
-// });
-// angular.module('blogApp').component('postsList', {
-//     /*template:
-//     '<table class="table">' +
-//     '<tr ng-repeat="item in $ctrl.items">' +
-//     '<td><img onload="$(this).show();" style="display: none; width: 150px" src="/uploads/images/{{item.pic}}"/></td>' +
-//     '<td><a>{[{item.title}]}</a></td>' +
-//     '<td>{[{item.body}]}</td>' +
-//     '</tr>' +
-//     '</table>',*/
-//     controller: function PostsListController($scope, $http) {
-//         var self = this;
-//         $scope.items = [{title: 'wtf1'}, {title: 'wtf2'}];
-//         /*$http.get('http://test_blog.local/app_dev.php/api/v1/blogs/1/10', {'Accept':'application/json'}).then(function(response) {
-//             /!*console.clear();
-//             console.log('Response here');
-//             console.log(response.data.items);
-//             self.items = response.data.items;*!/
-//             $scope.items = response.data.items;
-//             alert($scope);
-//         }, function(response) {
-//             alert('err');
-//         });*/
-//
-//     }
-// });

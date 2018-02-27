@@ -7,9 +7,24 @@
 
     <title>{% block title %}Welcome!{% endblock %}</title>
 
+
     <script src="{{ asset('js/jquery.js') }}"></script>
     <script src="{{ asset('js/jq_ui.js') }}"></script>
     <script src="{{ asset('js/jquery.fileupload.js') }}"></script>
+
+    {#<script src="http://requirejs.org/docs/release/2.2.0/minified/require.js"></script>#}
+    {#<script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>#}
+    {#<script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>#}
+
+    <script>
+        // const routes = require('../../web/js/fos_js_routes.json');
+        // import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+        // Routing.setRoutingData(routes);
+        // alert(Routing.generate('get_blog_all'));
+    </script>
+
+    {% block scripts %}{% endblock %}
+
     {% block stylesheets %}{% endblock %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
