@@ -3,14 +3,24 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\BlogPost;
+use AppBundle\Entity\Image;
 use AppBundle\Entity\Page;
 use AppBundle\Utils\CustomMethods;
 use AppBundle\Utils\QueryHelper;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sonata\BlockBundle\Block\BlockLoaderChain;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\EventDispatcher\GenericEvent;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class DefaultController extends Controller
 {
@@ -26,13 +36,181 @@ class DefaultController extends Controller
     }
 
     /**
+     * request to api (hardcoded request to post)
+     * @Route("/blog", name="post_blog")
+     * @param array $data
+     */
+    private function request($data = [], $type = 'POST') {
+        $url = 'http://test_blog.local/app_dev.php/api/v1/blog';
+        $curl = curl_init($url);
+
+        /*$type = 'POST';
+        $type = mb_strtoupper($type);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);*/
+
+        curl_setopt_array($curl, [
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HEADER => [
+                'Accept' => 'application/json'
+            ]
+        ]);
+        $response = curl_exec($curl);
+        print_r([$url]);
+        print_r($response);
+        die;
+    }
+
+    /**
+     * uploads image and creates new Image row in table. return image_id, image name & token
+     * @Route("/upload-image", name="rest_blog_upload")
+     */
+    public function uploadImageAction(Request $request) {
+        /**
+         * @var BlogPost $post
+         */
+        $post = new BlogPost();
+        $form = $this->getPostForm($post);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted()) {
+            /**
+             * @var UploadedFile $file
+             */
+            $file = $post->getPic();
+            $newName = md5(time() . $file->getBasename()) . '.' . $file->guessExtension();
+            $file->move($this->getParameter('images_directory'), $newName);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->getConnection()->beginTransaction();
+            try {
+
+                $token = md5(time() . $newName);
+                $image = new Image();
+                $image->setPath($newName);
+                $image->setToken($token);
+
+                $em->persist($image);
+                $em->flush();
+                $em->getConnection()->commit();
+
+                return new JsonResponse([
+                    'status' => true,
+                    'data' => [
+                        'token' => $token,
+                        'id' => $image->getId(),
+                        'image' => $newName
+                    ]
+                ], 200);
+            } catch(\Exception $e) {
+                $em->getConnection()->rollback();
+                throw $e;
+            }
+
+            die(get_class($file));
+        }
+
+
+        print_r($_FILES);
+        die;
+    }
+
+    /**
+     * ajax blog with rest ajax requests
      * @Route("/rest-blog", name="rest_blog")
      * @param Request $request
      */
-    public function blogAction(Request $request) {
+    //requirements={"id"="\d+"}, defaults={"id"=0}
+    public function blogAction(Request $request, SerializerInterface $serializer)
+    {
+        /**
+         * @var BlogPost $post
+         */
+        /*$post = null;
+        $method = 'POST';
+        //$data = $request->request->all();
+        $id = $request->request->get('form[id]', 0);
+        if($id) {
+            $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
+            $method = 'PUT';
+        }
+        if(!$post) {
+            $post = new BlogPost();
+            $method = 'POST';
+        }*/
+
+        $post = new BlogPost();
+        $form = $this->getPostForm($post);
+
+        $form->handleRequest($request);
+        if($form->isSubmitted()) {
+            if( $form->isValid()) {
+                // test code, development in progress
+                $data = $request->request->all();
+                $data = $data['form'];
+                if(isset($data['id']) && !empty($data['id'])) {
+                    $type = 'PUT';
+                } else {
+                    $type = 'POST';
+                }
+                $this->request($data, $type);
+                die;
+            } else {
+                $errs = [];
+                $errors = $form->getErrors(true, true);
+                //print_r($errors->count()); die;
+                foreach($errors as $err) {
+                    $errs[] = [
+                        'element' => $err->getOrigin()->getName(),
+                        'error' => $err->getMessage()
+                    ];
+                }
+
+                return new JsonResponse(['status' => false, 'errs' => $errs]);
+            }
+        }
+
         return $this->render('default/rest_blog.html.twig', [
+            'form' => $form->createView(),
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
         ]);
+    }
+
+    // returns form for posting/editing blogpost
+    private function getPostForm(BlogPost $post)
+    {
+        $builder = $this->createFormBuilder($post);
+        $builder
+            ->setMethod('POST')
+            ->add('_image_id', HiddenType::class, [
+                'mapped' => false
+            ])
+            ->add('_image_token', HiddenType::class, [
+                'mapped' => false
+            ])
+            ->add('title', TextType::class, [
+                'label' => 'Title'
+            ])
+            ->add('short', TextareaType::class, [
+                'label' => 'Short description'
+            ])
+            ->add('body', TextareaType::class, [
+                'label' => 'Body'
+            ])
+            ->add('pic', FileType::class, [
+                'label' => 'Image:',
+                'required' => false,
+                'data_class' => null
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => $post->getId() ? 'Edit' : 'Add'
+            ])
+            ->add('id', HiddenType::class, [
+                'mapped' => false
+            ])
+        ;
+        return $builder->getForm();
     }
 
     /**

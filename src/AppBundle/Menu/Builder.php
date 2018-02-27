@@ -24,6 +24,7 @@ class Builder implements ContainerAwareInterface
         $menu = $factory->createItem('root');
 
         $menu->addChild('Home', array('route' => 'homepage'));
+        $menu->addChild('Rest Ajax Blog', array('route' => 'rest_blog'));
         $menu->addChild('Angular Blog', array('route' => 'blog_angular'));
         $menu->addChild('Blog', array('route' => 'blog_index'));
 

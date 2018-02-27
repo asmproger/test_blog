@@ -14,6 +14,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Groups;
+
+use Doctrine\ORM\Mapping\OneToOne;
+use Doctrine\ORM\Mapping\JoinColumn;
+
 /**
  * Model for blog posts
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
@@ -23,6 +27,7 @@ use JMS\Serializer\Annotation\Groups;
  */
 class BlogPost
 {
+    private $_image_token;
     const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
      * @ORM\Id
@@ -37,11 +42,14 @@ class BlogPost
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"blog_post"})
      * @Expose
+     * @Assert\NotBlank()
      */
     private $title;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $label;
 
@@ -68,6 +76,8 @@ class BlogPost
 
     /**
      * @ORM\Column(nullable=true)
+     * @Groups({"blog_post"})
+     * @Expose
      */
     private $short;
 
@@ -75,6 +85,7 @@ class BlogPost
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"blog_post"})
      * @Expose
+     * @Assert\NotBlank()
      */
     private $body;
 
@@ -86,11 +97,43 @@ class BlogPost
     private $pic;
 
     /**
+     * @OneToOne(targetEntity="Image")
+     * @JoinColumn(name="image_id", referencedColumnName="id")
+     */
+    private $image;
+
+    /**
+     * @return mixed
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function getImageName()
+    {
+        /**
+         * @var Image $image
+         */
+        $image = $this->getImage();
+        return $image->getPath();
+    }
+
+    /**
+     * @param mixed $image
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+    }
+
+    /**
      * @return mixed
      */
     public function getPic()
     {
-        return $this->pic;
+        $image = $this->getImage();
+        return !empty($image) ? $image->getPath() : $this->pic;
     }
 
     /**
@@ -341,5 +384,40 @@ class BlogPost
     public function setUpdated()
     {
         $this->setModifiedDate(new \DateTime());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImageToken()
+    {
+        return $this->_image_token;
+    }
+
+    /**
+     * @param mixed $image_token
+     */
+    public function setImageToken($image_token)
+    {
+        $this->_image_token = $image_token;
+    }
+
+    /**
+     * set model fields from array
+     * @param array $data
+     */
+    public function setFromArray($data = [])
+    {
+
+        foreach ($data as $k => $v) {
+            if (strpos($k, '_') === 0 && strpos($k, 'image') !== false) {
+                continue;
+            }
+            $method = 'set' . ucfirst($k);
+            if (method_exists($this, $method)) {
+                $this->$method($v);
+            }
+        }
+
     }
 }
