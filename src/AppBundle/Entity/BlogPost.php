@@ -12,18 +12,24 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Groups;
 
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
-
+use JMS\Serializer\Annotation\VirtualProperty;
 /**
  * Model for blog posts
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="blog_posts")
  * @ExclusionPolicy("all")
+ *
+ * @VirtualProperty(
+ *     "pic",
+ *     exp="object.getPic()"
+ * )
  */
 class BlogPost
 {
@@ -84,7 +90,7 @@ class BlogPost
      * @ORM\Column(nullable=true)
      * @Assert\Length(max=200, maxMessage="Maximum length exeeded (200)")
      * @Groups({"blog_post"})
-     * @Expose
+     * @Exclude()
      */
     private $short;
 
@@ -99,7 +105,7 @@ class BlogPost
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"blog_post"})
-     * @Expose
+     * @Exclude()
      */
     private $pic;
 
