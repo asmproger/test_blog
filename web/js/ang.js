@@ -3,6 +3,7 @@ var apiUrl = 'http://test_blog.local/app_dev.php/api/v1/';
 var ipp = 10;
 var currentPage = 123;
 var postsList = [];
+
 //new angular app
 var app = angular.module('blogApp', [
         'ngRoute'
@@ -25,45 +26,70 @@ var app = angular.module('blogApp', [
                 .when('/post/:id', {
                     template: '<post-form></post-form>'
                 })
+                .when('/post-add', {
+                    template: '<post-form></post-form>'
+                })
                 .otherwise('/posts');
         })
 ;
 
 // component for add/edit new post
-var component = app.component('postForm', {
+var component_form = app.component('postForm', {
     //template: 'OK, BRO',
     templateUrl: '../form.html', // using templateurl beacouse of routing, i can't do this another way
     controller: ['$routeParams', '$scope', '$http', function PostsListController($routeParams, $scope, $http) {
+        var self = this,
+            id = $routeParams.hasOwnProperty('id') ? $routeParams.id : 0
+        ;
 
-        $scope.delete_post = function(id) {
-            $http.delete(apiUrl + 'blogs/' + id, {'Accept': 'application/json'}).then(function (response) {
-                for(var i in $scope.items) {
-                    var item = $scope.items[i];
-                    if(item.id == id) {
-                        $scope.items.splice(i, 1);
+        if (id !== 0) {
+            self.newItem = false;
+            if (postsList.length) { // not page reload, get item from array
+                for (var i in postsList) {
+                    if (postsList[i].id == id) {
+                        self.item = postsList[i];
                     }
                 }
-            }, function (response) {
-                alert('err');
-            });
-        };
+            } else { // lets get item from api
+                $http.get(apiUrl + 'blogs/' + id, {'Accept': 'application/json'}).then(function (response) {
+                    self.item = response.data;
+                    console.log(self.item);
+                }, function (response) {
+                    alert('err');
+                });
+            }
+        } else {
+            self.newItem = true;
+            self.item = {
+                title: '',
+                href: '',
+                short: '',
+                body: '',
+                enabled: 1
+            };
+        }
 
+        $scope.saveItem = function (element) {
+            var btn = $('#submit_btn');
+            var form = btn.closest('form');
+            var data = form.serialize();
 
-        var self = this;
-        var page = $routeParams.hasOwnProperty('page') ? $routeParams.page : 1;
-        var ipp = $routeParams.hasOwnProperty('ipp') ? $routeParams.ipp : 10;
-
-        currentPage = page;
-        // i don't know hot to use here symfony routes %) it's api calls, ok?
-        $http.get(apiUrl + 'blogs/' + page + '/' + ipp, {'Accept': 'application/json'}).then(function (response) {
-            $scope.items = response.data.items;
-            self.items = response.data.items;
-            /*console.clear();
-            console.log('Response here');
-            console.log(response.data);*/
-        }, function (response) {
-            alert('err');
-        });
+            if (self.newItem) {
+                $http.post(apiUrl + 'blogs', self.item, {'Accept': 'application/json'}).then(function (response) {
+                    
+                    location.href = '#!/posts';
+                }, function (err) {
+                    alert('save err')
+                });
+            } else {
+                $http.put(apiUrl + 'blog', self.item, {'Accept': 'application/json'}).then(function (response) {
+                    
+                    location.href = '#!/posts';
+                }, function (err) {
+                    alert('save err')
+                });
+            }
+        }
     }]
 });
 
@@ -73,11 +99,14 @@ var component = app.component('postsList', {
     templateUrl: '../test.template.html', // using templateurl beacouse of routing, i can't do this another way
     controller: ['$routeParams', '$scope', '$http', function PostsListController($routeParams, $scope, $http) {
 
-        $scope.delete_post = function(id) {
+        $scope.delete_post = function (id) {
+            if (!confirm('Are you shure?')) {
+                return;
+            }
             $http.delete(apiUrl + 'blogs/' + id, {'Accept': 'application/json'}).then(function (response) {
-                for(var i in $scope.items) {
+                for (var i in $scope.items) {
                     var item = $scope.items[i];
-                    if(item.id == id) {
+                    if (item.id === id) {
                         $scope.items.splice(i, 1);
                     }
                 }
@@ -94,8 +123,9 @@ var component = app.component('postsList', {
         currentPage = page;
         // i don't know hot to use here symfony routes %) it's api calls, ok?
         $http.get(apiUrl + 'blogs/' + page + '/' + ipp, {'Accept': 'application/json'}).then(function (response) {
-            $scope.items = response.data.items;
+            //$scope.items = response.data.items;
             self.items = response.data.items;
+            postsList = response.data.items;
             /*console.clear();
             console.log('Response here');
             console.log(response.data);*/

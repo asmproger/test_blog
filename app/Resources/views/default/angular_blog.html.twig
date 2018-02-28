@@ -8,10 +8,12 @@
     <div id="wrapper">
         <div id="container">
             {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
+            <div class="text-right">
+                <a class="btn btn-primary" href="#!/post-add">Add</a>
+            </div>
             <div id="welcome">
                 <h1><span>REST ANGULAR BLOG</span></h1>
             </div>
-
 
             <div ng-view class="view-frame"></div>
 

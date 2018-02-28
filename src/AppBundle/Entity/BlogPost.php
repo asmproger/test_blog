@@ -19,6 +19,7 @@ use JMS\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
 use JMS\Serializer\Annotation\VirtualProperty;
+
 /**
  * Model for blog posts. VirtualProperty allows us get pic from Image object in json object
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
@@ -61,7 +62,7 @@ class BlogPost
     /**
      * @ORM\Column(type="text")
      * @Groups({"blog_post"})
-     * @Expose
+     * @Expose()
      */
     private $label;
 
@@ -90,7 +91,7 @@ class BlogPost
      * @ORM\Column(nullable=true)
      * @Assert\Length(max=200, maxMessage="Maximum length exeeded (200)")
      * @Groups({"blog_post"})
-     * @Exclude()
+     * @Expose()
      */
     private $short;
 
@@ -204,6 +205,7 @@ class BlogPost
     /**
      * @ORM\Column(nullable=true)
      * @Assert\Url(message="Url is not valid!", protocols={"http", "https"})
+     * @Expose()
      */
     private $href;
 
@@ -430,7 +432,9 @@ class BlogPost
             }
             $method = 'set' . ucfirst($k);
             if (method_exists($this, $method)) {
-                $this->$method($v);
+                if ($k != 'id') {
+                    $this->$method($v);
+                }
             }
         }
 
