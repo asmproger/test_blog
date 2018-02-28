@@ -12,21 +12,33 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Groups;
 
 use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
-
+use JMS\Serializer\Annotation\VirtualProperty;
 /**
- * Model for blog posts
+ * Model for blog posts. VirtualProperty allows us get pic from Image object in json object
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="blog_posts")
  * @ExclusionPolicy("all")
+ *
+ * @VirtualProperty(
+ *     "pic",
+ *     exp="object.getPic()"
+ * )
  */
 class BlogPost
 {
+
+    public function __construct()
+    {
+        $this->created_date = new \DateTime();
+    }
+
     private $_image_token;
     const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
@@ -76,8 +88,9 @@ class BlogPost
 
     /**
      * @ORM\Column(nullable=true)
+     * @Assert\Length(max=200, maxMessage="Maximum length exeeded (200)")
      * @Groups({"blog_post"})
-     * @Expose
+     * @Exclude()
      */
     private $short;
 
@@ -92,7 +105,7 @@ class BlogPost
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"blog_post"})
-     * @Expose
+     * @Exclude()
      */
     private $pic;
 
@@ -133,6 +146,7 @@ class BlogPost
     public function getPic()
     {
         $image = $this->getImage();
+        //die(gettype($image));
         return !empty($image) ? $image->getPath() : $this->pic;
     }
 
@@ -188,7 +202,8 @@ class BlogPost
     }
 
     /**
-     * @ORM\Column()
+     * @ORM\Column(nullable=true)
+     * @Assert\Url(message="Url is not valid!", protocols={"http", "https"})
      */
     private $href;
 

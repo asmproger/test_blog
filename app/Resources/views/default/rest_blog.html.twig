@@ -18,6 +18,8 @@
             if (pages <= 1) {
                 return;
             }
+            $('.pagination').find('li:not([class])').remove();
+            $('.pagination').find('li.active').remove();
             var tmp = paginationContainer.find('.prev');
             for (var i = 1; i <= pages; i++) {
                 var $item = $('<li></li>');
@@ -68,16 +70,12 @@
                     //'Accept': 'text/html'
                     'Accept': 'application/json'
                 },
-                beforeSend: function () {
-
-                },
                 success: function (data, statusText, obj) {
                     buildContent(data);
-
                     // update active page on paginator
                     updatePagination();
                     showList();
-
+                    
                 }
             });
         }
@@ -89,11 +87,10 @@
             target.empty();
             for (var i in data.items) {
                 var item = data.items[i];
-                var tr = $('<tr></tr>');
-                tr.data('id', item.id);
+                var tr = $('<tr data-id="'+item.id+'"></tr>');
                 var td1 = $('<td><img style="display: none;" onload="$(this).show();" width="150" src="/uploads/images/' + item.pic + '" /></td>');
-                var td2 = $('<td>' + item.title + '</td>');
-                var td3 = $('<td>' + item.short + '</td>');
+                var td2 = $('<td><a class="blog-title" href="javascript://">' + item.title + '</a></td>');
+                var td3 = $('<td>' + ((item.short) ? item.short : '') + '</td>');
                 var td4 = $('<td><a class="blog-edit-ajax" href="javascript://">edit</a> <a class="blog-delete-ajax" href="javascript://">delete</a></td>');
                 tr.append(td1);
                 tr.append(td2);
@@ -146,17 +143,17 @@
             });
 
             // jq fileuploader
-            $('#form_pic').fileupload({
+            $('#blog_post_pic').fileupload({
                 url: '{{ path('rest_blog_upload') }}',
                 dataType: 'json',
                 done: function (e, data) {
                     if (data.result.status) {
-                        $('#form_image').css('width', '150px');
-                        $('#form_image').attr('src', '/uploads/images/' + data.result.data.image);
-                        $('#form_image').show();
+                        $('#blog_post_image').css('width', '150px');
+                        $('#blog_post_image').attr('src', '/uploads/images/' + data.result.data.image);
+                        $('#blog_post_image').show();
 
-                        $('#form__image_id').val(data.result.data.id);
-                        $('#form__image_token').val(data.result.data.token);
+                        $('#blog_post__image_id').val(data.result.data.id);
+                        $('#blog_post__image_token').val(data.result.data.token);
                     }
                     console.log(data);
                     $.each(data.result.files, function (index, file) {
@@ -194,7 +191,7 @@
                 type: 'delete',
                 dataType: 'json',
                 beforeSend: function () {
-
+                    
                 },
                 success: function (response) {
                     updatePagesCount(function () {
@@ -222,7 +219,6 @@
                 dataType: 'json',
                 success: function (response) {
                     showEditForm(response);
-
                 }
             });
         });
@@ -239,46 +235,55 @@
                 var key = keys[i];
                 var value = data[key];
 
-                var el = formWrapper.find('#form_' + key);
-                if (el.length) {
+                var el = formWrapper.find('#blog_post_' + key);
+                if (el.length && 'pic' !== key) {
                     el.val(value);
                 }
 
                 if ('pic' === key && value) {
-                    $('#form_image').attr('src', '/uploads/images/' + value);
-                    $('#form_image').show();
+                    $('#blog_post_image').attr('src', '/uploads/images/' + value);
+                    $('#blog_post_image').show();
                 }
             }
         }
 
         //form submit, collect data from html and ajax to post action
-        $(document).on('click', '#form_submit', function (e) {
-            var $form = $(this).closest('form');
-            var controls = $form.find(':input');
+        $(document).on('click', '#blog_post_submit', function (e) {
+
+            var $form = $(this).closest('form'),
+                data = $form.serialize(),
+                controls = $form.find(':input'),
+                url = isEdit ? '{{ path("put_blog") }}' : '{{ path("post_blog") }}',
+                type = isEdit ? 'PUT' : 'POST',
+                obj = {}
+            ;
+
+            $form.attr('method', type);
 
             //collect form data for api
-            var obj = {};
             $.each(controls, function (k, v) {
                 var el = $(v);
-                var name = el.attr('name').replace('form[', '');
+                var name = el.attr('name').replace('blog_post[', '');
                 name = name.replace(']', '');
                 // we need name-value pairs for our api
-                obj[name] = el.val();
+                if(name === 'submit') {
+                    obj[name] = true;
+                } else{
+                    obj[name] = el.val();
+                }
             });
-
-            var url = isEdit ? '{{ path("put_blog") }}' : '{{ path("post_blog") }}';
-            var type = isEdit ? 'PUT' : 'POST';
 
             $.ajax({
                 url: url,
-                data: obj,
+                data: data,
                 type: type,
                 dataType: 'json',
                 beforeSend: function () {
-
+                    
                 },
                 success: function (response, textStatus, xhr) {
                     if (response.status) {
+
                         updatePagesCount(function () {
                             loadPage(1);
                             buildPagination();
@@ -286,10 +291,10 @@
                     } else {
                         alert('err');
                     }
-
+                    
                 },
                 fail: function (resposne) {
-
+                    
                 }
             });
             return false;
@@ -342,13 +347,13 @@
                     'Accept': '*/*'
                 },
                 beforeSend: function () {
-
+                    
                 },
                 success: function (html, statusText, obj) {
                     bItem.html(html);
                     bList.hide();
                     bItem.show();
-
+                    
                 }
             });
         });
@@ -401,6 +406,18 @@
                         {{ form_widget(form.title, {'attr' : {'class': 'form-control'}}) }}
                         <p class="help-block">{{ form_errors(form.title) }}</p>
                     </div>
+
+                    {#<div class="form-group">
+                        {{ form_label(form.label) }}
+                        {{ form_widget(form.label, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.label) }}</p>
+                    </div>#}
+                    <div class="form-group">
+                        {{ form_label(form.href) }}
+                        {{ form_widget(form.href, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.href) }}</p>
+                    </div>
+
                     <div class="form-group">
                         {{ form_label(form.short) }}
                         {{ form_widget(form.short, {'attr' : {'class': 'form-control'}}) }}
@@ -414,10 +431,22 @@
                     <div class="form-group">
                         {{ form_widget(form.pic, {'attr' : {'class': 'form-control'}}) }}
                         <p class="help-block">{{ form_errors(form.pic) }}</p>
-                        <img id="form_image" style="display: none;" onload="$(this).show();"
+                        <img id="blog_post_image" style="display: none;" onload="$(this).show();"
                              class="product-image-preview"
                              src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
                     </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.created_date) }}
+                        {{ form_widget(form.created_date, {'attr' : {'class': ''}}) }}
+                        <p class="help-block">{{ form_errors(form.created_date) }}</p>
+                    </div>
+                    <div class="form-group">
+                        {{ form_label(form.enabled) }}
+                        {{ form_widget(form.enabled, {'attr' : {'class': ''}}) }}
+                        <p class="help-block">{{ form_errors(form.enabled) }}</p>
+                    </div>
+
                     <div class="form-group text-right">
                         {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href=""
                                                                                                       onclick="history.back(); return false;">cancel</a>
@@ -431,6 +460,10 @@
 {% endblock %}
 {% block stylesheets %}
     <style>
+        #blog_post_pic {
+            padding: 0;
+            border: none;
+        }
         #rest-container {
             margin-top: 20px;
             padding: 10px;
