@@ -27,6 +27,12 @@ use Doctrine\ORM\Mapping\JoinColumn;
  */
 class BlogPost
 {
+
+    public function __construct()
+    {
+        $this->created_date = new \DateTime();
+    }
+
     private $_image_token;
     const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**

@@ -398,12 +398,26 @@
 
                 <div class="post-form" style="display: none">
                     <a href="javascript://" onclick="showList()">Back to list</a>
+                    {{ dump(form) }}
                     {{ form_start(form, {'attr' : {'class': 'blogpost-form'}}) }}
-                    <div class="form-group">
+                        {{ form_widget(form) }}
+                    {#<div class="form-group">
                         {{ form_label(form.title) }}
                         {{ form_widget(form.title, {'attr' : {'class': 'form-control'}}) }}
                         <p class="help-block">{{ form_errors(form.title) }}</p>
                     </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.label) }}
+                        {{ form_widget(form.label, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.label) }}</p>
+                    </div>
+                    <div class="form-group">
+                        {{ form_label(form.href) }}
+                        {{ form_widget(form.href, {'attr' : {'class': 'form-control'}}) }}
+                        <p class="help-block">{{ form_errors(form.href) }}</p>
+                    </div>
+
                     <div class="form-group">
                         {{ form_label(form.short) }}
                         {{ form_widget(form.short, {'attr' : {'class': 'form-control'}}) }}
@@ -421,10 +435,22 @@
                              class="product-image-preview"
                              src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
                     </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.created_date) }}
+                        {{ form_widget(form.created_date, {'attr' : {'class': ''}}) }}
+                        <p class="help-block">{{ form_errors(form.created_date) }}</p>
+                    </div>
+                    <div class="form-group">
+                        {{ form_label(form.enabled) }}
+                        {{ form_widget(form.enabled, {'attr' : {'class': ''}}) }}
+                        <p class="help-block">{{ form_errors(form.enabled) }}</p>
+                    </div>
+
                     <div class="form-group text-right">
                         {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href=""
                                                                                                       onclick="history.back(); return false;">cancel</a>
-                    </div>
+                    </div>#}
                     {{ form_end(form) }}
                 </div>
             </div>
@@ -434,6 +460,10 @@
 {% endblock %}
 {% block stylesheets %}
     <style>
+        #form_pic {
+            padding: 0;
+            border: none;
+        }
         #rest-container {
             margin-top: 20px;
             padding: 10px;

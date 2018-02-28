@@ -2,9 +2,12 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Test;
 use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Image;
 use AppBundle\Entity\Page;
+use AppBundle\Form\BlogPostType;
+use AppBundle\Form\PostType;
 use AppBundle\Utils\CustomMethods;
 use AppBundle\Utils\QueryHelper;
 use Psr\Log\LoggerInterface;
@@ -12,6 +15,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sonata\BlockBundle\Block\BlockLoaderChain;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\EventDispatcher\GenericEvent;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -60,7 +65,10 @@ class DefaultController extends Controller
          * @var BlogPost $post
          */
         $post = new BlogPost();
-        $form = $this->getPostForm($post);
+        //$form = $this->getPostForm($post);
+
+        $form = $this->createForm(BlogPostType::class, $post, ['label' => $post->getId() ? 'Edit' : 'Add']);
+
         $form->handleRequest($request);
 
         if($form->isSubmitted()) {
@@ -116,21 +124,14 @@ class DefaultController extends Controller
         /**
          * @var BlogPost $post
          */
-        /*$post = null;
-        $method = 'POST';
-        //$data = $request->request->all();
-        $id = $request->request->get('form[id]', 0);
-        if($id) {
-            $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
-            $method = 'PUT';
-        }
-        if(!$post) {
-            $post = new BlogPost();
-            $method = 'POST';
-        }*/
+
+
+        $t = new Test();
+        $form = $this->createForm(PostType::class, $t);
 
         $post = new BlogPost();
-        $form = $this->getPostForm($post);
+        //$form = $this->getPostForm($post);
+        //$form = $this->createForm(BlogPostType::class, $post/*, ['label' => $post->getId() ? 'Edit' : 'Add']*/);
 
         $form->handleRequest($request);
         if($form->isSubmitted()) {
@@ -181,11 +182,29 @@ class DefaultController extends Controller
             ->add('title', TextType::class, [
                 'label' => 'Title'
             ])
+            ->add('label', TextType::class, [
+                'label' => 'Label'
+            ])
+            ->add('href', TextType::class, [
+                'label' => 'Href'
+            ])
             ->add('short', TextareaType::class, [
                 'label' => 'Short description'
             ])
             ->add('body', TextareaType::class, [
                 'label' => 'Body'
+            ])
+            ->add('created_date', DateTimeType::class, [
+                'label' => 'Creation date:',
+                'required' => false,
+                'placeholder' => array(
+                    'year' => 'Year', 'month' => 'Month', 'day' => 'Day',
+                    'hour' => 'Hour', 'minute' => 'Minute', 'second' => 'Second',
+                )
+            ])
+            ->add('enabled', CheckboxType::class, [
+                'label' => 'Enabled',
+                'required' => false
             ])
             ->add('pic', FileType::class, [
                 'label' => 'Image:',
