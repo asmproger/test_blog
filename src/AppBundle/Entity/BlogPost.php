@@ -20,7 +20,7 @@ use Doctrine\ORM\Mapping\OneToOne;
 use Doctrine\ORM\Mapping\JoinColumn;
 use JMS\Serializer\Annotation\VirtualProperty;
 /**
- * Model for blog posts
+ * Model for blog posts. VirtualProperty allows us get pic from Image object in json object
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BlogPostRepository")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="blog_posts")

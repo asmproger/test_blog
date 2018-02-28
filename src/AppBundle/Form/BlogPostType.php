@@ -20,6 +20,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Class BlogPostType
+ * @package AppBundle\Form
+ * Custom form for rest blog frontend & backend (validate data on api side)
+ */
 class BlogPostType extends AbstractType
 {
 
