@@ -82,6 +82,7 @@ class BlogPost
 
     /**
      * @ORM\Column(nullable=true)
+     * @Assert\Length(max=200, maxMessage="Maximum length exeeded (200)")
      * @Groups({"blog_post"})
      * @Expose
      */
@@ -195,7 +196,8 @@ class BlogPost
     }
 
     /**
-     * @ORM\Column()
+     * @ORM\Column(nullable=true)
+     * @Assert\Url(message="Url is not valid!", protocols={"http", "https"})
      */
     private $href;
 

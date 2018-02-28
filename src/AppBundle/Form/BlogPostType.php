@@ -23,30 +23,37 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class BlogPostType extends AbstractType
 {
 
-    public function buidForm(FormBuilderInterface $builder, array $options) {
-die('ok');
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
         $builder
-            ->setMethod('POST')
+            ->setMethod($options['method'])
             ->add('_image_id', HiddenType::class, [
-                'mapped' => false
+                'mapped' => false,
+                'required' => false
             ])
             ->add('_image_token', HiddenType::class, [
-                'mapped' => false
+                'mapped' => false,
+                'required' => false
             ])
-            ->add('Title', TextType::class, [
-                'label' => 'Title'
+            ->add('title', TextType::class, [
+                'label' => 'Title',
+                'required' => false
             ])
-            ->add('label', TextType::class, [
-                'label' => 'Label'
-            ])
+            /*->add('label', TextType::class, [
+                'label' => 'Label',
+                'disabled' => true
+            ])*/
             ->add('href', TextType::class, [
-                'label' => 'Href'
+                'label' => 'Href',
+                'required' => false
             ])
             ->add('short', TextareaType::class, [
-                'label' => 'Short description'
+                'label' => 'Short description',
+                'required' => false
             ])
             ->add('body', TextareaType::class, [
-                'label' => 'Body'
+                'label' => 'Body',
+                'required' => false
             ])
             ->add('created_date', DateTimeType::class, [
                 'label' => 'Creation date:',
@@ -69,9 +76,9 @@ die('ok');
                 'label' => $options['label']//$post->getId() ? 'Edit' : 'Add'
             ])
             ->add('id', HiddenType::class, [
-                'mapped' => false
-            ])
-        ;
+                'mapped' => false,
+                'required' => false
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

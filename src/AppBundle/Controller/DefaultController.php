@@ -125,16 +125,11 @@ class DefaultController extends Controller
          * @var BlogPost $post
          */
 
-
-        $t = new Test();
-        $form = $this->createForm(PostType::class, $t);
-
         $post = new BlogPost();
-        //$form = $this->getPostForm($post);
-        //$form = $this->createForm(BlogPostType::class, $post/*, ['label' => $post->getId() ? 'Edit' : 'Add']*/);
+        $form = $this->createForm(BlogPostType::class, $post, ['method' => 'POST']);
 
         $form->handleRequest($request);
-        if($form->isSubmitted()) {
+        /*if($form->isSubmitted()) {
             if( $form->isValid()) {
                 // test code, development in progress
                 $data = $request->request->all();
@@ -159,7 +154,7 @@ class DefaultController extends Controller
 
                 return new JsonResponse(['status' => false, 'errs' => $errs]);
             }
-        }
+        }*/
 
         return $this->render('default/rest_blog.html.twig', [
             'form' => $form->createView(),

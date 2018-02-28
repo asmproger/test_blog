@@ -68,12 +68,8 @@
                     //'Accept': 'text/html'
                     'Accept': 'application/json'
                 },
-                beforeSend: function () {
-                    
-                },
                 success: function (data, statusText, obj) {
                     buildContent(data);
-
                     // update active page on paginator
                     updatePagination();
                     showList();
@@ -93,7 +89,7 @@
                 tr.data('id', item.id);
                 var td1 = $('<td><img style="display: none;" onload="$(this).show();" width="150" src="/uploads/images/' + item.pic + '" /></td>');
                 var td2 = $('<td>' + item.title + '</td>');
-                var td3 = $('<td>' + item.short + '</td>');
+                var td3 = $('<td>' + ((item.short) ? item.short : '') + '</td>');
                 var td4 = $('<td><a class="blog-edit-ajax" href="javascript://">edit</a> <a class="blog-delete-ajax" href="javascript://">delete</a></td>');
                 tr.append(td1);
                 tr.append(td2);
@@ -146,7 +142,7 @@
             });
 
             // jq fileuploader
-            $('#form_pic').fileupload({
+            $('#blog_post_pic').fileupload({
                 url: '{{ path('rest_blog_upload') }}',
                 dataType: 'json',
                 done: function (e, data) {
@@ -222,7 +218,6 @@
                 dataType: 'json',
                 success: function (response) {
                     showEditForm(response);
-                    
                 }
             });
         });
@@ -239,8 +234,8 @@
                 var key = keys[i];
                 var value = data[key];
 
-                var el = formWrapper.find('#form_' + key);
-                if (el.length) {
+                var el = formWrapper.find('#blog_post_' + key);
+                if (el.length && 'pic' !== key) {
                     el.val(value);
                 }
 
@@ -252,23 +247,30 @@
         }
 
         //form submit, collect data from html and ajax to post action
-        $(document).on('click', '#form_submit', function (e) {
-            var $form = $(this).closest('form');
-            var data = $form.serialize();
-            var controls = $form.find(':input');
+        $(document).on('click', '#blog_post_submit', function (e) {
+
+            var $form = $(this).closest('form'),
+                data = $form.serialize(),
+                controls = $form.find(':input'),
+                url = isEdit ? '{{ path("put_blog") }}' : '{{ path("post_blog") }}',
+                type = isEdit ? 'PUT' : 'POST',
+                obj = {}
+            ;
+
+            $form.attr('method', type);
 
             //collect form data for api
-            var obj = {};
             $.each(controls, function (k, v) {
                 var el = $(v);
-                var name = el.attr('name').replace('form[', '');
+                var name = el.attr('name').replace('blog_post[', '');
                 name = name.replace(']', '');
                 // we need name-value pairs for our api
-                obj[name] = el.val();
+                if(name === 'submit') {
+                    obj[name] = true;
+                } else{
+                    obj[name] = el.val();
+                }
             });
-
-            var url = isEdit ? '{{ path("put_blog") }}' : '{{ path("post_blog") }}';
-            var type = isEdit ? 'PUT' : 'POST';
 
             $.ajax({
                 url: url,
@@ -280,8 +282,7 @@
                 },
                 success: function (response, textStatus, xhr) {
                     if (response.status) {
-                        console.log(response);
-                        return;
+
                         updatePagesCount(function () {
                             loadPage(1);
                             buildPagination();
@@ -398,20 +399,18 @@
 
                 <div class="post-form" style="display: none">
                     <a href="javascript://" onclick="showList()">Back to list</a>
-                    {{ dump(form) }}
                     {{ form_start(form, {'attr' : {'class': 'blogpost-form'}}) }}
-                        {{ form_widget(form) }}
-                    {#<div class="form-group">
+                    <div class="form-group">
                         {{ form_label(form.title) }}
                         {{ form_widget(form.title, {'attr' : {'class': 'form-control'}}) }}
                         <p class="help-block">{{ form_errors(form.title) }}</p>
                     </div>
 
-                    <div class="form-group">
+                    {#<div class="form-group">
                         {{ form_label(form.label) }}
                         {{ form_widget(form.label, {'attr' : {'class': 'form-control'}}) }}
                         <p class="help-block">{{ form_errors(form.label) }}</p>
-                    </div>
+                    </div>#}
                     <div class="form-group">
                         {{ form_label(form.href) }}
                         {{ form_widget(form.href, {'attr' : {'class': 'form-control'}}) }}
@@ -450,7 +449,7 @@
                     <div class="form-group text-right">
                         {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href=""
                                                                                                       onclick="history.back(); return false;">cancel</a>
-                    </div>#}
+                    </div>
                     {{ form_end(form) }}
                 </div>
             </div>
@@ -460,7 +459,7 @@
 {% endblock %}
 {% block stylesheets %}
     <style>
-        #form_pic {
+        #blog_post_pic {
             padding: 0;
             border: none;
         }
