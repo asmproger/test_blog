@@ -1,0 +1,23 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Title</th>
+        <th>Short</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in $ctrl.items">
+        <td>
+            <img onload="$(this).show()" style="display: none; width: 150px;" src="/uploads/images/{[{ item.pic }]}"/>
+        </td>
+        <td><a href="#!/posts/{[{ item.id }]}">{[{ item.title }]}</a></td>
+        <td>{[{ item.short }]}</td>
+        <td><a href="#!/post/{[{ item.id }]}">edit</a></td>
+        <td><a href="javascript://" ng-click="delete_post(item.id)">delete</a></td>
+    </tr>
+    </tbody>
+</table>
+
+<custom-pag></custom-pag>

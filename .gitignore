@@ -1,7 +1,5 @@
 .idea
 app/config/parameters.yml
 vendor
-var/cache
-var/logs
-var/sessions
+var/*
 web/uploads

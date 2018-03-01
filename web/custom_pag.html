@@ -1,0 +1,9 @@
+<nav class="text-center">
+    <ul class="pagination">
+        <li ng-repeat="n in $ctrl.pages_links" class="{[{$ctrl.current_page == n.page ? 'active' : ''}]}">
+            <span>
+                <a href="#!{[{ n.href }]}">{[{ n.page }]}</a>
+            </span>
+        </li>
+    </ul>
+</nav>

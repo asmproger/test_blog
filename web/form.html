@@ -1,0 +1,61 @@
+<form enctype="multipart/form-data">
+    <div class="form-group">
+        <label>
+            Title
+            <input ng-change="" data-ng-model="$ctrl.item.title" type="text" name="title"></label>
+        <p class="help-block"></p>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Href
+            <input ng-change="" data-ng-model="$ctrl.item.href" type="text" name="href"></label>
+        <p class="help-block"></p>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Short description
+            <textarea ng-change="" data-ng-model="$ctrl.item.short" name="short"></textarea></label>
+        <p class="help-block"></p>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Full description
+            <textarea ng-change="" name="body" data-ng-model="$ctrl.item.body"></textarea></label>
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label>Enabled<input data-ng-model="$ctrl.item.enabled" type="checkbox"></label>
+    </div>
+    <div class="form-group">
+        <label>
+            Image
+            <input type="file" nv-file-select uploader="uploader"/>
+        </label>
+        <ul>
+            <li ng-repeat="item in uploader.queue">
+                Name: <span ng-bind="item.file.name"></span><br/>
+                <button ng-click="item.upload()">upload</button>
+            </li>
+        </ul>
+        <img data-test="wtf" class="image-preview" src="/uploads/images/{[{$ctrl.item.pic}]}" width="150" onload="$(this).show();">
+    </div>
+    <!--<div class="form-group">
+        {{ form_label(form.created_date) }}
+        {{ form_widget(form.created_date, {'attr' : {'class': ''}}) }}
+        <p class="help-block">{{ form_errors(form.created_date) }}</p>
+    </div>
+    <div class="form-group">
+        {{ form_label(form.enabled) }}
+        {{ form_widget(form.enabled, {'attr' : {'class': ''}}) }}
+        <p class="help-block">{{ form_errors(form.enabled) }}</p>
+    </div>-->
+
+    <div class="form-group text-right">
+        <button id="submit_btn" ng-click="saveItem(this);" type="button">Save</button> or <a href="#!/posts">Cancel</a>
+    </div>
+    <input type="hidden" id="image_path">
+</form>
+<script>//initFileupload()</script>
