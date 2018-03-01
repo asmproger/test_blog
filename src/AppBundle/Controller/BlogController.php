@@ -4,8 +4,6 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Page;
-use AppBundle\Service\CustomUploader;
-use AppBundle\Service\GoogleParser;
 use AppBundle\Utils\CustomMethods;
 use Knp\Component\Pager\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;

@@ -173,6 +173,7 @@ class BlogPost
 
     /**
      * @ORM\Column(name="`enabled`", type="boolean", options={"default": true})
+     * @Expose()
      */
     private $enabled;
 

@@ -41,6 +41,88 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/upload-angular", name="upload_angular")
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function uploadAngularAction(Request $request) {
+        /**
+         * @var BlogPost $post
+         */
+
+        $response = ['status' => false];
+        if(!empty($_FILES) && isset($_FILES['file'])) {
+//echo(json_encode($_FILES['file']));die;
+            $name = $_FILES['file']['name'];
+            $ext = explode('.', $name);
+            if(count($ext) == 2) {
+                $ext = $ext[1];
+            } else {
+                $ext = '';
+            }
+            $newName = md5(time() . $_FILES['file']['name']) . '.' . $ext;
+
+            if(copy($_FILES['file']['tmp_name'], $this->getParameter('images_directory') . '/' . $newName)) {
+                $response['status'] = true;
+                $response['file'] = $newName;
+            }
+
+            echo(json_encode($response));
+            die;
+        }
+        echo(json_encode($response));
+        die;
+        $post = new BlogPost();
+        //$form = $this->getPostForm($post);
+
+        $form = $this->createForm(BlogPostType::class, $post, ['label' => $post->getId() ? 'Edit' : 'Add']);
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted()) {
+            /**
+             * @var UploadedFile $file
+             */
+            $file = $post->getPic();
+            $newName = md5(time() . $file->getBasename()) . '.' . $file->guessExtension();
+            $file->move($this->getParameter('images_directory'), $newName);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->getConnection()->beginTransaction();
+            try {
+
+                $token = md5(time() . $newName);
+                $image = new Image();
+                $image->setPath($newName);
+                $image->setToken($token);
+
+                $em->persist($image);
+                $em->flush();
+                $em->getConnection()->commit();
+
+                return new JsonResponse([
+                    'status' => true,
+                    'data' => [
+                        'token' => $token,
+                        'id' => $image->getId(),
+                        'image' => $newName
+                    ]
+                ], 200);
+            } catch(\Exception $e) {
+                $em->getConnection()->rollback();
+                throw $e;
+            }
+
+            die(get_class($file));
+        }
+
+
+        print_r($_FILES);
+        die;
+    }
+
+    /**
      * request to api (hardcoded request to post)
      * @Route("/blog", name="post_blog")
      * @param array $data

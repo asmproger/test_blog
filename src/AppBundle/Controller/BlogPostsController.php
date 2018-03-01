@@ -74,7 +74,9 @@ class BlogPostsController extends FOSRestController
             return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
         }
         $post->setFromArray($data);
-
+        if(isset($data['pic'])) {
+            $post->setImage(null);
+        }
 
         $validator = $this->get('validator');
         $errors = $validator->validate($post);
