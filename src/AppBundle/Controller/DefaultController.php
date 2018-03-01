@@ -34,7 +34,8 @@ class DefaultController extends Controller
      * @Route("/blog-angular", name="blog_angular")
      * @param Request $request
      */
-    public function blogaAction(Request $request) {
+    public function blogaAction(Request $request)
+    {
         return $this->render('default/angular_blog.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
         ]);
@@ -46,24 +47,25 @@ class DefaultController extends Controller
      * @return JsonResponse
      * @throws \Exception
      */
-    public function uploadAngularAction(Request $request) {
+    public function uploadAngularAction(Request $request)
+    {
         /**
          * @var BlogPost $post
          */
 
         $response = ['status' => false];
-        if(!empty($_FILES) && isset($_FILES['file'])) {
+        if (!empty($_FILES) && isset($_FILES['file'])) {
 //echo(json_encode($_FILES['file']));die;
             $name = $_FILES['file']['name'];
             $ext = explode('.', $name);
-            if(count($ext) == 2) {
+            if (count($ext) == 2) {
                 $ext = $ext[1];
             } else {
                 $ext = '';
             }
             $newName = md5(time() . $_FILES['file']['name']) . '.' . $ext;
 
-            if(copy($_FILES['file']['tmp_name'], $this->getParameter('images_directory') . '/' . $newName)) {
+            if (copy($_FILES['file']['tmp_name'], $this->getParameter('images_directory') . '/' . $newName)) {
                 $response['status'] = true;
                 $response['file'] = $newName;
             }
@@ -80,7 +82,7 @@ class DefaultController extends Controller
 
         $form->handleRequest($request);
 
-        if($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             /**
              * @var UploadedFile $file
              */
@@ -109,7 +111,7 @@ class DefaultController extends Controller
                         'image' => $newName
                     ]
                 ], 200);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $em->getConnection()->rollback();
                 throw $e;
             }
@@ -127,7 +129,8 @@ class DefaultController extends Controller
      * @Route("/blog", name="post_blog")
      * @param array $data
      */
-    private function request($data = [], $type = 'POST') {
+    private function request($data = [], $type = 'POST')
+    {
         $url = 'http://test_blog.local/app_dev.php/api/v1/blog';
         $curl = curl_init($url);
 
@@ -153,7 +156,8 @@ class DefaultController extends Controller
      * uploads image and creates new Image row in table. return image_id, image name & token
      * @Route("/upload-image", name="rest_blog_upload")
      */
-    public function uploadImageAction(Request $request) {
+    public function uploadImageAction(Request $request)
+    {
         /**
          * @var BlogPost $post
          */
@@ -164,7 +168,7 @@ class DefaultController extends Controller
 
         $form->handleRequest($request);
 
-        if($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             /**
              * @var UploadedFile $file
              */
@@ -193,7 +197,7 @@ class DefaultController extends Controller
                         'image' => $newName
                     ]
                 ], 200);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $em->getConnection()->rollback();
                 throw $e;
             }
@@ -304,8 +308,7 @@ class DefaultController extends Controller
             ])
             ->add('id', HiddenType::class, [
                 'mapped' => false
-            ])
-        ;
+            ]);
         return $builder->getForm();
     }
 
@@ -334,48 +337,36 @@ class DefaultController extends Controller
      */
     public function testAction(Request $request, \Swift_Mailer $mailer, LoggerInterface $logger)
     {
-        die('test controller');
-        $logger->error('ok');
+        $em = $this->getDoctrine()->getManager();
 
-        $dispatcher = $this->get('event_dispatcher_custom');
-        $dispatcher->dispatch('custom_list', new GenericEvent());
+        // disabled items
+        /*$query = $em
+            ->createQuery('SELECT p FROM AppBundle:BlogPost p WHERE p.enabled = :enabled ORDER BY p.id ASC')
+            ->setParameter('enabled', 0);*/
 
-        die;
-        $helper = new QueryHelper($this->getDoctrine(), $this->get('mailer'), $this->get('twig'));
-        $helper->execute(null);
+        // enabled items
+        /*$query = $em
+            ->createQuery('SELECT p FROM AppBundle:BlogPost p WHERE p.enabled = :enabled ORDER BY p.id ASC')
+            ->setParameter('enabled', 1);*/
 
-
-        return;
-        $message = (new \Swift_Message('Hello Email'))
-            ->setFrom('no-reply@test_blog.local')
-            ->setTo('asmproger@gmail.com')
-            ->setBody(
-                $this->renderView(
-                    'partials/email_template.html.twig',
-                    [
-                        'posts_count' => mt_rand(0, 999),
-                        'time_cost' => mt_rand(0, 99999)
-                    ]
-                ),
-                'text/html'
-            )/*
-             * If you also want to include a plaintext version of the message
-            ->addPart(
-                $this->renderView(
-                    'Emails/registration.txt.twig',
-                    array('name' => $name)
-                ),
-                'text/plain'
-            )
-            */
+        // with Image pics
+        $query = $em
+            ->createQuery('SELECT DISTINCT bp FROM AppBundle:BlogPost bp JOIN bp.image i')
+        ;
+        // with field pics
+        $query = $em
+            ->createQuery('SELECT DISTINCT bp FROM AppBundle:BlogPost bp where bp.image is null')
+            //->createQuery('SELECT DISTINCT bp, i FROM AppBundle:BlogPost bp JOIN bp.image i')
+            //->createQuery('SELECT DISTINCT u.id FROM CmsArticle a JOIN a.user u')
         ;
 
-        $res = $mailer->send($message);
-        die('result - _' . $res . '_');
-        // replace this example code with whatever you need
+
+        $items = $query->getResult();
+
         return $this->render('default/test.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
+            'items' => $items
         ]);
+        die('test controller');
     }
 
     /**

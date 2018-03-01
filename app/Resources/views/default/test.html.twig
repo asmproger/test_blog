@@ -5,6 +5,28 @@
         <div id="container">
             {{ knp_menu_render('AppBundle:Builder:mainMenu') }}
             <h3>Test</h3>
+            <h6>Items count - <b>{{ items|length }}</b></h6>
+            <hr style="border-top: 1px solid gray;">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Title</th>
+                    <th>image</th>
+                    <th>pic</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.title }}</td>
+                        {#<td><img width="150" src="{{ asset('/uploads/images/') ~ item.image.path }}"></td>#}
+                        <td><img width="150" src="{{ asset('/uploads/images/') ~ item.pic }}"></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}

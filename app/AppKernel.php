@@ -41,7 +41,7 @@ class AppKernel extends Kernel
             new JMS\SerializerBundle\JMSSerializerBundle(),
 
             // Js routing
-            new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
+            //new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
