@@ -1,5 +1,5 @@
 // urll for api calls
-let apiUrl = 'http://test_blog.local/app_dev.php/api/v1/',
+let apiUrl = '/app_dev.php/api/v1/',
     ipp = 10,
     currentPage = 123,
     postsList = [],
@@ -124,7 +124,7 @@ var component_form = app.component('postForm', {
                     self.item = response.data;
                     console.log(self.item);
                 }, function (response) {
-                    alert('err');
+                    alert('err 1');
                 });
             }
         } else {
@@ -144,7 +144,7 @@ var component_form = app.component('postForm', {
             var data = form.serialize();
 
             if (self.newItem) {
-                $http.post(apiUrl + 'blogs', self.item, {'Accept': 'application/json'}).then(function (response) {
+                $http.post(apiUrl + 'blog', self.item, {'Accept': 'application/json'}).then(function (response) {
                     console.log(response);
                     location.href = '#!/posts';
                 }, function (err) {
@@ -180,7 +180,7 @@ var component = app.component('postsList', {
                     }
                 }
             }, function (response) {
-                alert('err');
+                alert('err 2');
             });
         };
 
@@ -199,7 +199,8 @@ var component = app.component('postsList', {
             console.log('Response here');
             console.log(response.data);*/
         }, function (response) {
-            alert('err');
+            alert('err 3');
+            console.log(response);
         });
     }]
 });
@@ -224,13 +225,13 @@ var component_detail = app.component('postDetail', {
         }).then(function (response) {
             self.item = response.data;
         }, function (response) {
-            alert('err');
+            alert('err 4');
 
         });
         /*$http.get(apiUrl + 'blogs/' + this.id, {'Accept': 'application/json'}).then(function (response) {
             self.item = response.data;
         }, function (response) {
-            alert('err');
+            alert('err 5');
 
         });*/
     }]
@@ -262,8 +263,8 @@ var component_paginator = app.component('customPag', {
             }
             self.item = response.data;
         }, function (response) {
-            alert('err');
-            console.log(arguments);
+            alert('err 6');
+            console.log(response);
         });
         /*$http.get(apiUrl + 'blogs/' + this.id, {'Accept': 'application/json'}).then(function (response) {
             self.item = response.data;
