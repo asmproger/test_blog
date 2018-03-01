@@ -21,7 +21,11 @@
                     <tr>
                         <td>{{ item.id }}</td>
                         <td>{{ item.title }}</td>
-                        {#<td><img width="150" src="{{ asset('/uploads/images/') ~ item.image.path }}"></td>#}
+                        <td>
+                            {% if item.image is not null %}
+                                <img width="150" src="{{ asset('/uploads/images/') ~ item.image.path }}">
+                            {% endif %}
+                        </td>
                         <td><img width="150" src="{{ asset('/uploads/images/') ~ item.pic }}"></td>
                     </tr>
                 {% endfor %}
