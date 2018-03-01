@@ -74,14 +74,20 @@ class BlogPostsController extends FOSRestController
             return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
         }
         $post->setFromArray($data);
-        if(isset($data['pic'])) {
+        if (isset($data['_image_id']) && !empty($data['_image_id'])) {
+            $image = $this->getDoctrine()->getRepository(Image::class)->find($data['_image_id']);
+            if ($image) {
+                $post->setImage($image);
+            }
+        }
+        if (isset($data['pic']) && !empty($data['pic'])) {
             $post->setImage(null);
         }
 
         $validator = $this->get('validator');
         $errors = $validator->validate($post);
         $errs = [];
-        if(count($errors)) {
+        if (count($errors)) {
             foreach ($errors->getIterator() as $err) {
                 $errs[] = [
                     'name' => $err->getPropertyPath(),
@@ -102,64 +108,6 @@ class BlogPostsController extends FOSRestController
             $em->getConnection()->rollback();
             return new JsonResponse(['status' => false, 'message' => 'Server error', 'message' => $e->getMessage()], 500);
         }
-
-        /*$form = $this->createForm(BlogPostType::class, $post, ['method' => 'PUT']);
-        $form->handleRequest($request);
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-
-                $image_id = isset($data['blog_post']['_image_id']) ? $data['blog_post']['_image_id'] : 0;
-                if ($image_id) {
-                    $image = $em->getRepository(Image::class)->find($data['blog_post']['_image_id']);
-                    $post->setImage($image);
-                }
-
-                $em->getConnection()->beginTransaction();
-                try {
-                    $em->persist($post);
-                    $em->flush();
-                    $em->getConnection()->commit();
-                    return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
-                } catch (\Exception $e) {
-                    $em->getConnection()->rollback();
-                    return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
-                }
-                return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
-            } else {
-                $errs = [];
-                $errors = $form->getErrors(true, true);
-                //print_r($errors->count()); die;
-                foreach ($errors as $err) {
-                    $errs[] = [
-                        'element' => $err->getOrigin()->getName(),
-                        'error' => $err->getMessage()
-                    ];
-                }
-                return new JsonResponse(['status' => false, 'code' => 400, 'message' => 'Invalid data', 'errors' => $errs], 400);
-            }
-        }
-
-        $em = $this->getDoctrine()->getManager();
-
-        $post->setFromArray($data);
-
-        $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
-        if ($image_id) {
-            $image = $em->getRepository(Image::class)->find($data['_image_id']);
-            $post->setImage($image);
-        }
-
-        $em->getConnection()->beginTransaction();
-        try {
-            $em->persist($post);
-            $em->flush();
-            $em->getConnection()->commit();
-            return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
-        } catch (\Exception $e) {
-            $em->getConnection()->rollback();
-            return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
-        }*/
     }
 
     /**
@@ -170,6 +118,17 @@ class BlogPostsController extends FOSRestController
         $post = new BlogPost();
         $data = $request->request->all();
         $post->setFromArray($data);
+
+        if (isset($data['_image_id']) && !empty($data['_image_id'])) {
+            $image = $this->getDoctrine()->getRepository(Image::class)->find($data['_image_id']);
+            if ($image) {
+                $post->setImage($image);
+            }
+        }
+        if (isset($data['pic']) && !empty($data['pic'])) {
+            $post->setImage(null);
+        }
+
         /**
          * @var \Symfony\Component\Validator\ConstraintViolation $err
          * @var \Symfony\Component\Validator\ConstraintViolationList $errors
@@ -178,7 +137,7 @@ class BlogPostsController extends FOSRestController
         $validator = $this->get('validator');
         $errors = $validator->validate($post);
         $errs = [];
-        if(count($errors)) {
+        if (count($errors)) {
             foreach ($errors->getIterator() as $err) {
                 $errs[] = [
                     'name' => $err->getPropertyPath(),
@@ -199,54 +158,6 @@ class BlogPostsController extends FOSRestController
             $em->getConnection()->rollback();
             return new JsonResponse(['status' => false, 'message' => 'Server error', 'message' => $e->getMessage()], 500);
         }
-
-        /*
-        $form = $this->createForm(BlogPostType::class, $post, ['method' => 'POST']);
-        $form->handleRequest($request);
-        if($form->isSubmitted()) {
-            if($form->isValid()) {
-                $post = $form->getData();
-                $post->setCreatedDate(new \DateTime());
-                $post->setEnabled(1);
-                $post->setHref('http://test_blog.local');
-
-                $data = $form->getExtraData();
-                $image_id = isset($data['_image_id']) ? $data['_image_id'] : 0;
-
-                $image = $this->getDoctrine()->getRepository(Image::class)->find($image_id);
-                if($image) {
-                    $post->setImage($image);
-                    $image->setToken('');
-                }
-
-                $em = $this->getDoctrine()->getManager();
-                $em->getConnection()->beginTransaction();
-                try {
-                    if($image){
-                        $em->persist($image);
-                    }
-                    $em->persist($post);
-                    $em->flush();
-                    $em->getConnection()->commit();
-
-                    return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
-                } catch (\Exception $e) {
-                    $em->getConnection()->rollback();
-                    return new JsonResponse(['status' => false, 'code' => 500, 'message' => $e->getMessage()], 500);
-                }
-            } else {
-                $errs = [];
-                $errors = $form->getErrors(true, true);
-                //print_r($errors->count()); die;
-                foreach($errors as $err) {
-                    $errs[] = [
-                        'element' => $err->getOrigin()->getName(),
-                        'error' => $err->getMessage()
-                    ];
-                }
-                return new JsonResponse(['status' => false, 'code' => 400, 'message' => 'Invalid data', 'errors' => $errs], 400);
-            }
-        }*/
     }
 
     /**

@@ -112,8 +112,16 @@
             if (isEdit) {
                 formWrapper.find('.btn-primary').html('Save');
             } else {
+                clearForm();
                 formWrapper.find('.btn-primary').html('Add');
             }
+        }
+        // clear form fields
+        function clearForm() {
+            formWrapper.find(':input').each(function(i, el) {
+                $(el).val('');
+            });
+            $('#blog_post_image').attr('src', '');
         }
 
         // hide everything and show posts list
@@ -230,13 +238,13 @@
 
         // fill form with data from api
         function fillForm(data) {
-            var keys = Object.getOwnPropertyNames(data);
-            for (var i in keys) {
-                var key = keys[i];
-                var value = data[key];
+            let keys = Object.getOwnPropertyNames(data);
+            for (let i in keys) {
+                let key = keys[i],
+                    value = data[key],
+                    el = formWrapper.find('#blog_post_' + key);
 
-                var el = formWrapper.find('#blog_post_' + key);
-                if (el.length && 'pic' !== key) {
+                if (el.length && 'pic' !== key && 'enabled' !== key) {
                     el.val(value);
                 }
 
@@ -244,13 +252,16 @@
                     $('#blog_post_image').attr('src', '/uploads/images/' + value);
                     $('#blog_post_image').show();
                 }
+
+                if ('enabled' === key) {
+                    el.prop('checked', value);
+                }
             }
         }
 
         //form submit, collect data from html and ajax to post action
         $(document).on('click', '#blog_post_submit', function (e) {
-
-            var $form = $(this).closest('form'),
+            let $form = $(this).closest('form'),
                 data = $form.serialize(),
                 controls = $form.find(':input'),
                 url = isEdit ? '{{ path("put_blog") }}' : '{{ path("post_blog") }}',
@@ -262,20 +273,24 @@
 
             //collect form data for api
             $.each(controls, function (k, v) {
-                var el = $(v);
-                var name = el.attr('name').replace('blog_post[', '');
+                let el = $(v), name = el.attr('name').replace('blog_post[', '');
                 name = name.replace(']', '');
                 // we need name-value pairs for our api
+
                 if(name === 'submit') {
                     obj[name] = true;
-                } else{
-                    obj[name] = el.val();
+                } else {
+                    if(name === 'enabled') {
+                        obj[name] = +el.prop('checked');
+                    } else {
+                        obj[name] = el.val();
+                    }
                 }
             });
 
             $.ajax({
                 url: url,
-                data: data,
+                data: obj,
                 type: type,
                 dataType: 'json',
                 beforeSend: function () {
@@ -283,7 +298,6 @@
                 },
                 success: function (response, textStatus, xhr) {
                     if (response.status) {
-
                         updatePagesCount(function () {
                             loadPage(1);
                             buildPagination();
@@ -302,9 +316,9 @@
 
         // for paginator links
         $(document).on('click', '.pagination a', function (e) {
-            var self = $(this);
-            var page = 1;
-            var _class = self.closest('li').attr('class');
+            let self = $(this),
+                page = 1,
+                _class = self.closest('li').attr('class');
             switch (_class) {
                 case 'first':
                     page = 1;
@@ -313,7 +327,7 @@
                     page = (current_page > 0) ? --current_page : 1;
                     break;
                 case 'next':
-                    page = (current_page  pages) ? ++current_page : pages;
+                    page = (current_page < pages) ? ++current_page : pages;
                     break;
                 case 'last':
                     page = pages;
@@ -433,6 +447,7 @@
                         <p class="help-block">{{ form_errors(form.pic) }}</p>
                         <img id="blog_post_image" style="display: none;" onload="$(this).show();"
                              class="product-image-preview"
+                             width="150"
                              src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
                     </div>
 

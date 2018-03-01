@@ -7,10 +7,13 @@
 
     <title>{% block title %}Welcome!{% endblock %}</title>
 
-
     <script src="{{ asset('js/jquery.js') }}"></script>
     <script src="{{ asset('js/jq_ui.js') }}"></script>
     <script src="{{ asset('js/jquery.fileupload.js') }}"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
 
     {#<script src="http://requirejs.org/docs/release/2.2.0/minified/require.js"></script>#}
     {#<script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>#}
@@ -37,10 +40,7 @@
     {% block body %}{% endblock %}
 </div>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
 
 
 </body>
