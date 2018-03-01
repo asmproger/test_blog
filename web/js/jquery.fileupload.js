@@ -8,7 +8,6 @@
  * Licensed under the MIT license:
  * https://opensource.org/licenses/MIT
  */
-console.log('FILEUPLOAD FILE LOADED');
 /* jshint nomen:false */
 /* global define, require, window, document, location, Blob, FormData */
 

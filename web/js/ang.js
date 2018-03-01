@@ -212,7 +212,6 @@ var component_detail = app.component('postDetail', {
         this.id = $routeParams.id;
 
         var self = this;
-        this.test = 'OK';
         $http({
             method: 'GET',
             url: apiUrl + 'blogs/' + this.id,

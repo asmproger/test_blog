@@ -55,10 +55,13 @@ class BlogPostsController extends FOSRestController
         return new JsonResponse(['status' => true, 'code' => 200, 'message' => 'ok'], 200);
     }
 
+
     /**
-     * update existing blogpost item
+     * one action for put & post request
+     * @param Request $request
+     * @Route("api/v1/blog.{_format}", name="api_post_action", methods={"POST", "PUT"}, defaults={"_format"="json"})
      */
-    public function putBlogAction(Request $request)
+    public function actionAction(Request $request)
     {
         /**
          * @var BlogPost $post
@@ -67,79 +70,37 @@ class BlogPostsController extends FOSRestController
          * @var \Symfony\Component\Validator\Validator\TraceableValidator $validator
          */
         $data = $request->request->all();
-        $id = $data['id'];
-        $post = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
-
-        if (!$id || !$post) {
-            return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
-        }
-        $post->setFromArray($data);
-        if (isset($data['_image_id']) && !empty($data['_image_id'])) {
-            $image = $this->getDoctrine()->getRepository(Image::class)->find($data['_image_id']);
-            if ($image) {
-                $post->setImage($image);
-            }
-        }
-        if (isset($data['pic']) && !empty($data['pic'])) {
-            $post->setImage(null);
-        }
-
-        $validator = $this->get('validator');
-        $errors = $validator->validate($post);
-        $errs = [];
-        if (count($errors)) {
-            foreach ($errors->getIterator() as $err) {
-                $errs[] = [
-                    'name' => $err->getPropertyPath(),
-                    'error' => $err->getMessage()
-                ];
-            }
-            return new JsonResponse(['status' => false, 'message' => 'Invalid data', 'errors' => $errs], 400);
-        }
-
-        $em = $this->getDoctrine()->getManager();
-        $em->getConnection()->beginTransaction();
-        try {
-            $em->persist($post);
-            $em->flush();
-            $em->getConnection()->commit();
-            return new JsonResponse(['status' => true, 'message' => 'OK'], 200);
-        } catch (\Exception $e) {
-            $em->getConnection()->rollback();
-            return new JsonResponse(['status' => false, 'message' => 'Server error', 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * create new blogpost item or update exist
-     */
-    public function postBlogAction(Request $request)
-    {
         $post = new BlogPost();
-        $data = $request->request->all();
-        $post->setFromArray($data);
 
+        if($request->isMethod('PUT')) { // post edition
+            $id = isset($data['id']) ? $data['id'] : 0;
+            $post = ($id) ? $this->getDoctrine()->getRepository(BlogPost::class)->find($id) : null;
+            if (!$id || !$post) {
+                return new JsonResponse(['status' => false, 'code' => 404, 'message' => 'Post not found'], 404);
+            }
+        }
+
+        $post->setFromArray($data);
+        // let's link image to this post
         if (isset($data['_image_id']) && !empty($data['_image_id'])) {
             $image = $this->getDoctrine()->getRepository(Image::class)->find($data['_image_id']);
             if ($image) {
                 $post->setImage($image);
             }
         }
+        // if there is path to image, let's remove current image_id
         if (isset($data['pic']) && !empty($data['pic'])) {
             $post->setImage(null);
         }
 
-        /**
-         * @var \Symfony\Component\Validator\ConstraintViolation $err
-         * @var \Symfony\Component\Validator\ConstraintViolationList $errors
-         * @var \Symfony\Component\Validator\Validator\TraceableValidator $validator
-         */
+
         $validator = $this->get('validator');
         $errors = $validator->validate($post);
         $errs = [];
+        //we have some errors?
         if (count($errors)) {
             foreach ($errors->getIterator() as $err) {
-                $errs[] = [
+                $errs[] = [ // let's collect it!
                     'name' => $err->getPropertyPath(),
                     'error' => $err->getMessage()
                 ];
@@ -147,6 +108,7 @@ class BlogPostsController extends FOSRestController
             return new JsonResponse(['status' => false, 'message' => 'Invalid data', 'errors' => $errs], 400);
         }
 
+        //everything is ok
         $em = $this->getDoctrine()->getManager();
         $em->getConnection()->beginTransaction();
         try {

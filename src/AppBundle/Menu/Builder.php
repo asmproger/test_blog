@@ -15,6 +15,11 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Menu builder for KNP menu
+ * Class Builder
+ * @package AppBundle\Menu
+ */
 class Builder implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -24,9 +29,9 @@ class Builder implements ContainerAwareInterface
         $menu = $factory->createItem('root');
 
         $menu->addChild('Home', array('route' => 'homepage'));
-        $menu->addChild('Rest Ajax Blog', array('route' => 'rest_blog'));
-        $menu->addChild('Angular Blog', array('route' => 'blog_angular'));
         $menu->addChild('Blog', array('route' => 'blog_index'));
+        $menu->addChild('Ajax Blog', array('route' => 'rest_blog'));
+        $menu->addChild('Angular Blog', array('route' => 'blog_angular'));
 
         // access services from the container!
         $em = $this->container->get('doctrine')->getManager();
@@ -43,7 +48,6 @@ class Builder implements ContainerAwareInterface
         //$menu->addChild('About Me', array('route' => 'homepage'));
         // you can also add sub level's to your menu's as follows
         //$menu['About Me']->addChild('Edit profile', array('route' => 'default_test'));
-
         return $menu;
     }
 }
