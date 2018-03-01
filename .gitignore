@@ -2,4 +2,6 @@
 app/config/parameters.yml
 vendor
 var/*
-web/uploads
+web/bundles
+web/uploads/images/*
+!web/uploads/images/index.html
