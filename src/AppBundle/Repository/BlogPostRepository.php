@@ -12,9 +12,11 @@ use AppBundle\Entity\BlogPost;
 
 class BlogPostRepository extends \Doctrine\ORM\EntityRepository
 {
+
     // create new blogpost item from array with valid key=>value params
     public function setFromArray(array $params)
     {
+
         if (empty($params)) {
             return false;
         }
@@ -36,7 +38,7 @@ class BlogPostRepository extends \Doctrine\ORM\EntityRepository
         }
         $post->setCreatedDate(new \DateTime());
         $post->setEnabled(1);
-        $post->setHref('http://test_blog.local');
+        $post->setHref('');
         return $post;
     }
 }

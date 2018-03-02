@@ -146,8 +146,7 @@ class GoogleParser
                 return $item;
             }
         }
-        return null;
-        throw new \Exception('All rows imoprted');
+        return [];
     }
 
     /**

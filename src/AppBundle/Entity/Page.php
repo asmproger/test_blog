@@ -198,26 +198,6 @@ class Page
         $this->setLabel($label);
     }
 
-    /**
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     */
-    public function uploadPic()
-    {
-        if (null === $this->getFile()) {
-            return;
-        }
-
-        $newName = md5(time()) . '.' . $this->getFile()->guessExtension();
-
-        $this->file->move(
-            self::FILE_PATH, $newName
-        );
-
-        $this->pic = $newName;
-        $this->file = null;
-    }
-
     public function setUpdated()
     {
         $this->setModifiedDate(new \DateTime());

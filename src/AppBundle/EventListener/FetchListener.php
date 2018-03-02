@@ -62,5 +62,4 @@ class FetchListener
             );
         $this->mailer->send($message);
     }
-
 }

@@ -41,7 +41,7 @@ class BlogPost
     }
 
     private $_image_token;
-    const FILE_PATH = '/var/www/blog/web/uploads/images/';
+    //const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -172,7 +172,7 @@ class BlogPost
 
 
     /**
-     * @ORM\Column(name="`enabled`", type="boolean", options={"default": true})
+     * @ORM\Column(name="`enabled`", type="boolean", options={"default": true}, nullable=true)
      * @Expose()
      */
     private $enabled;
@@ -377,26 +377,6 @@ class BlogPost
         $label = mb_strtolower($this->getTitle());
         $label = str_replace([' ', '-', '+', '=', '!', '?'], '_', $label);
         $this->setLabel($label);
-    }
-
-    /**
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
-     */
-    public function uploadPic()
-    {
-        if (null === $this->getFile()) {
-            return;
-        }
-
-        $newName = md5(time()) . '.' . $this->getFile()->guessExtension();
-
-        $this->file->move(
-            self::FILE_PATH, $newName
-        );
-
-        $this->pic = $newName;
-        $this->file = null;
     }
 
     public function setUpdated()

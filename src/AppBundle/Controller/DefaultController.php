@@ -31,6 +31,7 @@ class DefaultController extends Controller
 {
 
     /**
+     * Main page of blog angular version
      * @Route("/blog-angular", name="blog_angular")
      * @param Request $request
      */
@@ -42,6 +43,7 @@ class DefaultController extends Controller
     }
 
     /**
+     * Upload photo for angular blog version
      * @Route("/upload-angular", name="upload_angular")
      * @param Request $request
      * @return JsonResponse
@@ -52,10 +54,8 @@ class DefaultController extends Controller
         /**
          * @var BlogPost $post
          */
-
         $response = ['status' => false];
         if (!empty($_FILES) && isset($_FILES['file'])) {
-//echo(json_encode($_FILES['file']));die;
             $name = $_FILES['file']['name'];
             $ext = explode('.', $name);
             if (count($ext) == 2) {
@@ -69,87 +69,9 @@ class DefaultController extends Controller
                 $response['status'] = true;
                 $response['file'] = $newName;
             }
-
-            echo(json_encode($response));
-            die;
+            return new JsonResponse($response, 200);
         }
-        echo(json_encode($response));
-        die;
-        $post = new BlogPost();
-        //$form = $this->getPostForm($post);
-
-        $form = $this->createForm(BlogPostType::class, $post, ['label' => $post->getId() ? 'Edit' : 'Add']);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            /**
-             * @var UploadedFile $file
-             */
-            $file = $post->getPic();
-            $newName = md5(time() . $file->getBasename()) . '.' . $file->guessExtension();
-            $file->move($this->getParameter('images_directory'), $newName);
-
-            $em = $this->getDoctrine()->getManager();
-            $em->getConnection()->beginTransaction();
-            try {
-
-                $token = md5(time() . $newName);
-                $image = new Image();
-                $image->setPath($newName);
-                $image->setToken($token);
-
-                $em->persist($image);
-                $em->flush();
-                $em->getConnection()->commit();
-
-                return new JsonResponse([
-                    'status' => true,
-                    'data' => [
-                        'token' => $token,
-                        'id' => $image->getId(),
-                        'image' => $newName
-                    ]
-                ], 200);
-            } catch (\Exception $e) {
-                $em->getConnection()->rollback();
-                throw $e;
-            }
-
-            die(get_class($file));
-        }
-
-
-        print_r($_FILES);
-        die;
-    }
-
-    /**
-     * request to api (hardcoded request to post)
-     * @Route("/blog", name="post_blog")
-     * @param array $data
-     */
-    private function request($data = [], $type = 'POST')
-    {
-        $url = 'http://test_blog.local/app_dev.php/api/v1/blog';
-        $curl = curl_init($url);
-
-        /*$type = 'POST';
-        $type = mb_strtoupper($type);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);*/
-
-        curl_setopt_array($curl, [
-            CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS => $data,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_HEADER => [
-                'Accept' => 'application/json'
-            ]
-        ]);
-        $response = curl_exec($curl);
-        print_r([$url]);
-        print_r($response);
-        die;
+        return new JsonResponse($response, 400);
     }
 
     /**
@@ -162,10 +84,7 @@ class DefaultController extends Controller
          * @var BlogPost $post
          */
         $post = new BlogPost();
-        //$form = $this->getPostForm($post);
-
         $form = $this->createForm(BlogPostType::class, $post, ['label' => $post->getId() ? 'Edit' : 'Add']);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -179,7 +98,6 @@ class DefaultController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             try {
-
                 $token = md5(time() . $newName);
                 $image = new Image();
                 $image->setPath($newName);
@@ -199,59 +117,24 @@ class DefaultController extends Controller
                 ], 200);
             } catch (\Exception $e) {
                 $em->getConnection()->rollback();
-                throw $e;
+                return new JsonResponse(['status' => false]);
             }
-
-            die(get_class($file));
         }
-
-
-        print_r($_FILES);
-        die;
+        return new JsonResponse(['status' => false]);
     }
 
     /**
-     * ajax blog with rest ajax requests
+     * Main page of blog ajax version. Using rest as a backend
      * @Route("/rest-blog", name="rest_blog")
      * @param Request $request
      */
-    //requirements={"id"="\d+"}, defaults={"id"=0}
     public function blogAction(Request $request, SerializerInterface $serializer)
     {
         /**
          * @var BlogPost $post
          */
-
         $post = new BlogPost();
         $form = $this->createForm(BlogPostType::class, $post, ['method' => 'POST']);
-
-        $form->handleRequest($request);
-        /*if($form->isSubmitted()) {
-            if( $form->isValid()) {
-                // test code, development in progress
-                $data = $request->request->all();
-                $data = $data['form'];
-                if(isset($data['id']) && !empty($data['id'])) {
-                    $type = 'PUT';
-                } else {
-                    $type = 'POST';
-                }
-                $this->request($data, $type);
-                die;
-            } else {
-                $errs = [];
-                $errors = $form->getErrors(true, true);
-                //print_r($errors->count()); die;
-                foreach($errors as $err) {
-                    $errs[] = [
-                        'element' => $err->getOrigin()->getName(),
-                        'error' => $err->getMessage()
-                    ];
-                }
-
-                return new JsonResponse(['status' => false, 'errs' => $errs]);
-            }
-        }*/
 
         return $this->render('default/rest_blog.html.twig', [
             'form' => $form->createView(),
@@ -259,80 +142,21 @@ class DefaultController extends Controller
         ]);
     }
 
-    // returns form for posting/editing blogpost
-    private function getPostForm(BlogPost $post)
-    {
-        $builder = $this->createFormBuilder($post);
-        $builder
-            ->setMethod('POST')
-            ->add('_image_id', HiddenType::class, [
-                'mapped' => false
-            ])
-            ->add('_image_token', HiddenType::class, [
-                'mapped' => false
-            ])
-            ->add('title', TextType::class, [
-                'label' => 'Title'
-            ])
-            ->add('label', TextType::class, [
-                'label' => 'Label'
-            ])
-            ->add('href', TextType::class, [
-                'label' => 'Href'
-            ])
-            ->add('short', TextareaType::class, [
-                'label' => 'Short description'
-            ])
-            ->add('body', TextareaType::class, [
-                'label' => 'Body'
-            ])
-            ->add('created_date', DateTimeType::class, [
-                'label' => 'Creation date:',
-                'required' => false,
-                'placeholder' => array(
-                    'year' => 'Year', 'month' => 'Month', 'day' => 'Day',
-                    'hour' => 'Hour', 'minute' => 'Minute', 'second' => 'Second',
-                )
-            ])
-            ->add('enabled', CheckboxType::class, [
-                'label' => 'Enabled',
-                'required' => false
-            ])
-            ->add('pic', FileType::class, [
-                'label' => 'Image:',
-                'required' => false,
-                'data_class' => null
-            ])
-            ->add('submit', SubmitType::class, [
-                'label' => $post->getId() ? 'Edit' : 'Add'
-            ])
-            ->add('id', HiddenType::class, [
-                'mapped' => false
-            ]);
-        return $builder->getForm();
-    }
-
     /**
+     * Standart symfony homepage
      * @Route("/", name="homepage")
      */
     public function indexAction(Request $request)
     {
-        // replace this example code with whatever you need
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
         ]);
     }
 
-    /**
-     * @Route("/test2", name="default_rest")
-     * @param Request $request
-     */
-    public function test2Action(Request $request)
-    {
-        return $this->render('default/rest.html.twig', []);
-    }
 
     /**
+     * Test controller, playing with DQL
+     * Commented blocks - examples
      * @Route("/test", name="default_test")
      */
     public function testAction(Request $request, \Swift_Mailer $mailer, LoggerInterface $logger)
@@ -366,10 +190,10 @@ class DefaultController extends Controller
         return $this->render('default/test.html.twig', [
             'items' => $items
         ]);
-        die('test controller');
     }
 
     /**
+     * Display pseudo static page (About, Contacts, etc.)
      * @Route("/page/{url}", name="default_page")
      */
     public function pageAction(Request $request)
@@ -385,18 +209,16 @@ class DefaultController extends Controller
             ->where('p.label = :label')
             ->setParameter('label', $url);
         $query = $builder->getQuery();
-        $product = $query->getResult();
+        $page = $query->getResult();
 
-        if (!empty($product)) {
-            $product = $product[0];
+        if (!empty($page)) {
+            $page = $page[0];
         } else {
-            $product = false;
+            $page = false;
         }
 
         return $this->render('default/page.html.twig', [
-            'product' => $product
+            'product' => $page
         ]);
-
-        die('ok');
     }
 }

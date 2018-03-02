@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BlogPost;
 use AppBundle\Entity\Page;
+use AppBundle\Repository\BlogPostRepository;
 use AppBundle\Utils\CustomMethods;
 use Knp\Component\Pager\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -22,14 +23,6 @@ class BlogController extends Controller
      */
     public function indexAction(Request $request)
     {
-        /*$t = new GoogleParser($this->getDoctrine());
-        $t->setQuery('sibers');
-        $t->parse();
-        $row = $t->getRow();
-
-        print_r($row);
-        die('ok');*/
-
         /**
          * @var QueryBuilder $builder
          */

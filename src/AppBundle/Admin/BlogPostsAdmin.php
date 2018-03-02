@@ -9,6 +9,7 @@
 namespace AppBundle\Admin;
 
 use AppBundle\Entity\BlogPost;
+use AppBundle\Repository\BlogPostRepository;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
@@ -56,11 +57,33 @@ class BlogPostsAdmin extends AbstractAdmin
         return 'Static page';
     }
 
-    public function preUpdate($obj)
+    public function prePersist($object)
+    {
+        $this->uploadPic($object);
+    }
+
+    public function preUpdate($object)
     {
         /**
-         * @var BlogPost $obj
+         * @var BlogPost $object
          */
-        $obj->setUpdated();
+        if( !empty($object->getFile()) ) {
+            $this->uploadPic($object);
+        }
+    }
+
+    private function uploadPic(BlogPost $post)
+    {
+        if (null === $post->getFile()) {
+            return;
+        }
+
+        $newName = md5(time()) . '.' . $post->getFile()->guessExtension();
+        $path = $this->getConfigurationPool()->getContainer()->getParameter('images_directory');
+
+        $post->getFile()->move(
+            $path, $newName
+        );
+        $post->setPic($newName);
     }
 }

@@ -16,8 +16,14 @@ use Doctrine\Bundle\FixturesBundle\ORMFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+/**
+ * Test data for first start after deploy
+ * Class AppFixtures
+ * @package AppBundle\DataFixtures
+ */
 class AppFixtures extends Fixture
 {
+    // we need addadmin, and encode his password
     private $encoder;
     public function __construct(UserPasswordEncoderInterface $encoder)
     {

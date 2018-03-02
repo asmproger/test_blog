@@ -55,8 +55,29 @@ class PageAdmin extends AbstractAdmin
         return 'Static page';
     }
 
-    public function preUpdate($product)
+    public function prePersist($object)
     {
-        $product->setUpdated();
+        $this->uploadPic($object);
+    }
+
+    public function preUpdate($object)
+    {
+        $this->uploadPic($object);
+        $object->setUpdated();
+    }
+
+    private function uploadPic(Page $post)
+    {
+        if (null === $post->getFile()) {
+            return;
+        }
+
+        $newName = md5(time()) . '.' . $post->getFile()->guessExtension();
+        $path = $this->getConfigurationPool()->getContainer()->getParameter('images_directory');
+
+        $post->getFile()->move(
+            $path, $newName
+        );
+        $post->setPic($newName);
     }
 }
