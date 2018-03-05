@@ -78,5 +78,8 @@ services:
             $mailer: '@mailer'
             $twig: '@twig'
             $logger: '@logger'
+            $robot_email: '%robot_email%'
+            $admin_email: '%admin_email%'
+            #$container: '@container'
         tags:
             - { name: kernel.event_listener, event: custom_fetch, method: 'onFetch' }

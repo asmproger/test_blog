@@ -9,6 +9,8 @@ parameters:
     locale: en
     images_directory: '%kernel.project_dir%/web/uploads/images'
     host: 'http://test_blog.local'
+    robot_email: 'no-reply@test_blog.local'
+    admin_email: 'asmproger@gmail.com'
 
 framework:
     #esi: ~

@@ -9,6 +9,7 @@
 namespace AppBundle\EventListener;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
@@ -22,6 +23,9 @@ class FetchListener
     private $twig;
     private $logger;
 
+    private $robot_email;
+    private $admin_email;
+
     /**
      * mailer for sending email, twig for rendering email template, logger - for testing
      * FetchListener constructor.
@@ -29,11 +33,13 @@ class FetchListener
      * @param \Twig_Environment $twig
      * @param LoggerInterface $logger
      */
-    public function __construct(\Swift_Mailer $mailer, \Twig_Environment $twig, LoggerInterface $logger)
+    public function __construct(\Swift_Mailer $mailer, \Twig_Environment $twig, LoggerInterface $logger, $robot_email, $admin_email)
     {
         $this->mailer = $mailer;
         $this->twig = $twig;
         $this->logger = $logger;
+        $this->robot_email = $robot_email;
+        $this->admin_email = $admin_email;
     }
 
     /**
@@ -58,8 +64,8 @@ class FetchListener
 
         // email sending code
         $message = (new \Swift_Message('Hello Email'))
-            ->setFrom('no-reply@test_blog.local')
-            ->setTo('asmproger@gmail.com')
+            ->setFrom($this->robot_email)
+            ->setTo($this->admin_email)
             ->setBody(
                 $this->twig->render('partials/email_template.html.twig', ['report' => $params]),
                 'text/html'
