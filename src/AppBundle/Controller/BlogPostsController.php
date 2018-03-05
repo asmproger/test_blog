@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
 
+use Symfony\Component\Routing\Annotation\Route;
+use FOS\RestBundle\Controller\Annotations\Get;
+
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -175,7 +178,6 @@ class BlogPostsController extends FOSRestController
      * @param $id
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    //* @throws \Exception
     public function getBlogAction($id)
     {
         $item = $this->getDoctrine()->getRepository(BlogPost::class)->find($id);
