@@ -88,7 +88,7 @@
             for (var i in data.items) {
                 var item = data.items[i];
                 var tr = $('<tr data-id="'+item.id+'"></tr>');
-                var td1 = $('<td><img style="display: none;" onload="$(this).show();" width="150" src="/uploads/images/' + item.pic + '" /></td>');
+                var td1 = $('<td><img class="hidden-image image-preview-class" onload="$(this).show();" src="/uploads/images/' + item.pic + '" /></td>');
                 var td2 = $('<td><a class="blog-title" href="javascript://">' + item.title + '</a></td>');
                 var td3 = $('<td>' + ((item.short) ? item.short : '') + '</td>');
                 var td4 = $('<td><a class="blog-edit-ajax" href="javascript://">edit</a> <a class="blog-delete-ajax" href="javascript://">delete</a></td>');
@@ -366,7 +366,7 @@
                     bItem.html(html);
                     bList.hide();
                     bItem.show();
-                    
+
                 }
             });
         });
@@ -409,9 +409,9 @@
                     {% include 'partials/rest_blog_pagination.html.twig' %}
                 </div>
 
-                <div class="blog-item" style="display: none;"></div>
+                <div class="blog-item hidden-element"></div>
 
-                <div class="post-form" style="display: none">
+                <div class="post-form hidden-element">
                     <a href="javascript://" onclick="showList()">Back to list</a>
                     {{ form_start(form, {'attr' : {'class': 'blogpost-form'}}) }}
                     <div class="form-group">
@@ -438,9 +438,8 @@
                     <div class="form-group">
                         {{ form_widget(form.pic, {'attr' : {'class': 'form-control'}}) }}
                         <p class="help-block">{{ form_errors(form.pic) }}</p>
-                        <img id="blog_post_image" style="display: none;" onload="$(this).show();"
-                             class="product-image-preview"
-                             width="150"
+                        <img id="blog_post_image" onload="$(this).show();"
+                             class="product-image-preview hidden-image image-preview-class"
                              src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
                     </div>
 
@@ -465,18 +464,4 @@
 
         </div>
     </div>
-{% endblock %}
-{% block stylesheets %}
-    <style>
-        #blog_post_pic {
-            padding: 0;
-            border: none;
-        }
-        #rest-container {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid gray;
-
-        }
-    </style>
 {% endblock %}

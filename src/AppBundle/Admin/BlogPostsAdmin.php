@@ -42,8 +42,7 @@ class BlogPostsAdmin extends AbstractAdmin
     {
         $list
             ->addIdentifier('title')
-            ->add('label')
-        ;
+            ->add('label');
     }
 
     public function toString($object)
@@ -64,14 +63,13 @@ class BlogPostsAdmin extends AbstractAdmin
 
     public function preUpdate($object)
     {
-        /**
-         * @var BlogPost $object
-         */
-        if( !empty($object->getFile()) ) {
-            $this->uploadPic($object);
-        }
+        $this->uploadPic($object);
     }
 
+    /**
+     * Move picture from tmp dir to our public, and saving filename
+     * @param BlogPost $post
+     */
     private function uploadPic(BlogPost $post)
     {
         if (null === $post->getFile()) {

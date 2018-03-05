@@ -1,7 +1,6 @@
 {% for item in paginator %}
     <tr data-id="{{ item.id }}">
         <td>
-
             {% include 'partials/image_view.html.twig' with {'src' : item.pic} %}
         </td>
         <td>
@@ -18,42 +17,3 @@
         </td>
     </tr>
 {% endfor %}
-{#
-<table class="table">
-    <thead>
-    <tr>
-        <th></th>
-        <th>Title</th>
-        <th>Short</th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody id="table_content">
-        {% for item in paginator %}
-            <tr data-id="{{ item.id }}">
-                <td>
-                    {% set image = item.getImage %}
-                    {% if image %}
-                        {% set src = image.getPath %}
-                    {% else %}
-                        {% set src = item.pic %}
-                    {% endif %}
-                    {% include 'partials/image_view.html.twig' with {'src' : src} %}
-                </td>
-                <td>
-                    <a class="blog-title" href="javascript://">
-                        {{ item.title }}
-                    </a>
-                </td>
-                <td>
-                    {{ item.short }}
-                </td>
-                <td>
-                    <a class="blog-edit-ajax" href="javascript://">edit</a>
-                    <a class="blog-delete-ajax" href="javascript://">delete</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{{ knp_pagination_render(paginator) }}#}

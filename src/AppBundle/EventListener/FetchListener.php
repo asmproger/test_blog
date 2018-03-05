@@ -44,7 +44,7 @@ class FetchListener
         // lets fetch our report from evet
         $params = $event->getArguments();
         if (empty($params)) {
-            // no data& lets inform admin about the error
+            // no data? lets inform admin about the error
             $params = [
                 'postCollected' => 0,
                 'time' => 0,

@@ -41,7 +41,6 @@ class BlogPost
     }
 
     private $_image_token;
-    //const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")

@@ -19,7 +19,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Page
 {
-    const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")

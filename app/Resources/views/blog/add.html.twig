@@ -27,7 +27,7 @@
                 <div class="form-group">
                     {{ form_widget(form.pic, {'attr' : {'class': 'form-control'}}) }}
                     <p class="help-block">{{ form_errors(form.pic) }}</p>
-                    <img style="display: none;" onload="$(this).show();" class="product-image-preview" src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
+                    <img onload="$(this).show();" class="image-preview-class hidden-image product-image-preview" src="{{ asset('/uploads/images/') ~ form.vars.value.pic }}"/>
                 </div>
                 <div class="form-group text-right">
                     {{ form_widget(form.submit, {'attr' : {'class': 'btn btn-primary'}}) }} or <a href="" onclick="history.back(); return false;">cancel</a>

@@ -2,3 +2,28 @@
     width: 150px;
     display: none;
 }
+.image-preview-class {
+    width: 150px;
+}
+.hidden-image  {
+    display: none;
+}
+#rest-container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid gray;
+}
+
+.hidden-element {
+    display: none;
+}
+#blog_post_pic {
+    padding: 0;
+    border: none;
+}
+#rest-container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid gray;
+
+}
