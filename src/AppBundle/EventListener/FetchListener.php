@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
- * Event listener. Triggered after custom fetch task end works
+ * Event listener. Triggered after custom fetch task end works. Send repost email to site admin.
  * Class FetchListener
  * @package AppBundle\EventListener
  */
@@ -39,6 +39,13 @@ class FetchListener
         $this->logger = $logger;
     }
 
+    /**
+     * Main method. All the logic here.
+     * @param GenericEvent $event
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
+     * @throws \Twig_Error_Syntax
+     */
     public function onFetch(GenericEvent $event)
     {
         // lets fetch our report from evet

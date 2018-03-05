@@ -29,7 +29,8 @@ class CustomCommand extends Command
     private $helper;
     private $doctrine;
     private $logger;
-private $e;
+    private $e;
+
     /**
      * CustomCommand constructor.
      */
@@ -42,6 +43,9 @@ private $e;
         parent::__construct();
     }
 
+    /**
+     * Calls before execute
+     */
     public function configure()
     {
         $this
@@ -51,6 +55,12 @@ private $e;
             ->addArgument('query', null, 'Query string to search engine', null);
     }
 
+    /**
+     * Main function of comman. Calls whe someone type custom:query in console
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         //fetching settings from DB or input

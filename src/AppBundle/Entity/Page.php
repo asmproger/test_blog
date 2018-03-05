@@ -20,6 +20,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Page
 {
     /**
+     * @var int
+     *
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -28,16 +30,21 @@ class Page
     private $id;
 
     /**
+     * @var string
+     *
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $title;
 
     /**
+     * @var string
+     *
      * @ORM\Column(type="text")
      */
     private $label;
 
     /**
+     * Get label
      * @return mixed
      */
     public function getLabel()
@@ -45,11 +52,17 @@ class Page
         return $this->label;
     }
 
+    /**
+     * Get url
+     *
+     * @return string
+     */
     public function getUrl() {
         return $this->label;
     }
 
     /**
+     * Set label
      * @param mixed $label
      */
     public function setLabel($label)
@@ -58,21 +71,26 @@ class Page
     }
 
     /**
+     * @var string
      * @ORM\Column(nullable=true)
      */
     private $short;
 
     /**
+     * @var string
      * @ORM\Column(type="text", nullable=true)
      */
     private $body;
 
     /**
+     * @var string
      * @ORM\Column(type="text", nullable=true)
      */
     private $pic;
 
     /**
+     * Get pic
+     *
      * @return mixed
      */
     public function getPic()
@@ -81,6 +99,8 @@ class Page
     }
 
     /**
+     * Set pic
+     *
      * @param mixed $pic
      */
     public function setPic($pic)
@@ -89,11 +109,15 @@ class Page
     }
 
     /**
+     * @var \DateTime
+     *
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $modified_date;
 
     /**
+     * Get id
+     *
      * @return mixed
      */
     public function getId()
@@ -102,6 +126,8 @@ class Page
     }
 
     /**
+     * Set id
+     *
      * @param mixed $id
      */
     public function setId($id)
@@ -110,6 +136,8 @@ class Page
     }
 
     /**
+     * Get title
+     *
      * @return mixed
      */
     public function getTitle()
@@ -118,6 +146,8 @@ class Page
     }
 
     /**
+     * Set title
+     *
      * @param mixed $title
      */
     public function setTitle($title)
@@ -126,6 +156,8 @@ class Page
     }
 
     /**
+     * Get short
+     *
      * @return mixed
      */
     public function getShort()
@@ -134,6 +166,8 @@ class Page
     }
 
     /**
+     * Set short
+     *
      * @param mixed $short
      */
     public function setShort($short)
@@ -142,6 +176,8 @@ class Page
     }
 
     /**
+     * Get body
+     *
      * @return mixed
      */
     public function getBody()
@@ -150,6 +186,8 @@ class Page
     }
 
     /**
+     * Set body
+     *
      * @param mixed $body
      */
     public function setBody($body)
@@ -158,6 +196,8 @@ class Page
     }
 
     /**
+     * Get modified date
+     *
      * @return mixed
      */
     public function getModifiedDate()
@@ -166,6 +206,8 @@ class Page
     }
 
     /**
+     * Set modified date
+     *
      * @param mixed $modified_date
      */
     public function setModifiedDate($modified_date)
@@ -173,20 +215,33 @@ class Page
         $this->modified_date = $modified_date;
     }
 
-
+    /**
+     * @var UploadedFile
+     */
     private $file;
 
+    /**
+     * Set file
+     *
+     * @param UploadedFile $file
+     */
     public function setFile(UploadedFile $file)
     {
         $this->file = $file;
     }
 
+    /**
+     * Get file
+     * @return UploadedFile
+     */
     public function getFile()
     {
         return $this->file;
     }
 
     /**
+     * Generate label
+     *
      * @ORM\PrePersist
      * @ORM\PreUpdate
      */
@@ -197,6 +252,9 @@ class Page
         $this->setLabel($label);
     }
 
+    /**
+     * Set updated
+     */
     public function setUpdated()
     {
         $this->setModifiedDate(new \DateTime());

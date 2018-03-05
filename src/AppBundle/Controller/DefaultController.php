@@ -27,6 +27,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * Class DefaultController
+ * @package AppBundle\Controller
+ */
 class DefaultController extends Controller
 {
 

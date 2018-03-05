@@ -23,8 +23,9 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  */
 class AppFixtures extends Fixture
 {
-    // we need addadmin, and encode his password
+    // we need add admin, and encode his password
     private $encoder;
+
     public function __construct(UserPasswordEncoderInterface $encoder)
     {
         $this->encoder = $encoder;
@@ -41,6 +42,7 @@ class AppFixtures extends Fixture
         $user->setEnabled(1);
         $user->setRoles(['ROLE_SUPER_ADMIN']);
 
+        // very difficul password for admin2
         $pwd = $this->encoder->encodePassword($user, '123456');
         $user->setPassword($pwd);
 

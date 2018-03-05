@@ -15,6 +15,13 @@ namespace AppBundle\Utils;
  */
 class CustomMethods
 {
+    /**
+     * Same as print_r or var_dump, but with beautiful black-green design. Just like old-school
+     * @param $var
+     * @param bool $return
+     * @param bool $special
+     * @return mixed|string
+     */
     public static function print_arr($var, $return = false, $special = true) {
         $type = gettype($var);
 
@@ -50,6 +57,12 @@ class CustomMethods
             return $out;
     }
 
+    /**
+     * Same as print_arr, but with die
+     * @param $var
+     * @param bool $return
+     * @param bool $special
+     */
     public static function print_die($var, $return = false, $special = true) {
         CustomMethods::print_arr($var, $return, $special);
         $info = debug_backtrace();

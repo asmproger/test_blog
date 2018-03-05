@@ -42,6 +42,8 @@ class BlogPost
 
     private $_image_token;
     /**
+     * @var int
+     *
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -51,6 +53,8 @@ class BlogPost
     private $id;
 
     /**
+     * @var string
+     *
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"blog_post"})
      * @Expose
@@ -59,6 +63,8 @@ class BlogPost
     private $title;
 
     /**
+     * @var string
+     *
      * @ORM\Column(type="text")
      * @Groups({"blog_post"})
      * @Expose()
@@ -66,6 +72,8 @@ class BlogPost
     private $label;
 
     /**
+     * Get label
+     *
      * @return mixed
      */
     public function getLabel()
@@ -73,12 +81,19 @@ class BlogPost
         return $this->label;
     }
 
+    /**
+     * Get url (alias to getLabel)
+     *
+     * @return string
+     */
     public function getUrl()
     {
         return $this->label;
     }
 
     /**
+     * Set label
+     *
      * @param mixed $label
      */
     public function setLabel($label)
@@ -87,6 +102,8 @@ class BlogPost
     }
 
     /**
+     * @var string
+     *
      * @ORM\Column(nullable=true)
      * @Assert\Length(max=200, maxMessage="Maximum length exeeded (200)")
      * @Groups({"blog_post"})
@@ -95,6 +112,8 @@ class BlogPost
     private $short;
 
     /**
+     * @var string
+     *
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"blog_post"})
      * @Expose
@@ -103,6 +122,8 @@ class BlogPost
     private $body;
 
     /**
+     * @var string
+     *
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"blog_post"})
      * @Exclude()
@@ -110,12 +131,16 @@ class BlogPost
     private $pic;
 
     /**
+     * Foreign key?
+     *
      * @OneToOne(targetEntity="Image")
      * @JoinColumn(name="image_id", referencedColumnName="id")
      */
     private $image;
 
     /**
+     * Get image
+     *
      * @return mixed
      */
     public function getImage()
@@ -123,6 +148,11 @@ class BlogPost
         return $this->image;
     }
 
+    /**
+     * Get image name
+     *
+     * @return mixed
+     */
     public function getImageName()
     {
         /**
@@ -133,6 +163,8 @@ class BlogPost
     }
 
     /**
+     * Set image
+     *
      * @param mixed $image
      */
     public function setImage($image)
@@ -141,6 +173,8 @@ class BlogPost
     }
 
     /**
+     * Get pic
+     *
      * @return mixed
      */
     public function getPic()
@@ -151,6 +185,8 @@ class BlogPost
     }
 
     /**
+     * Set pic
+     *
      * @param mixed $pic
      */
     public function setPic($pic)
@@ -159,34 +195,46 @@ class BlogPost
     }
 
     /**
+     * @var \DateTime
+     *
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $modified_date;
 
 
     /**
+     * @var \DateTime
+     *
      * @ORM\Column(type="datetime", options={"default":"CURRENT_TIMESTAMP"})
      */
     private $created_date;
 
 
     /**
+     * @var boolean
+     *
      * @ORM\Column(name="`enabled`", type="boolean", options={"default": true}, nullable=true)
      * @Expose()
      */
     private $enabled;
 
     /**
+     * @var int
+     *
      * @ORM\Column(type="integer", nullable=true)
      */
     private $views_count;
 
     /**
+     * @var int
+     *
      * @ORM\Column(type="integer", nullable=true)
      */
     private $likes_count;
 
     /**
+     * Get href
+     *
      * @return mixed
      */
     public function getHref()
@@ -195,6 +243,8 @@ class BlogPost
     }
 
     /**
+     * Set href
+     *
      * @param mixed $href
      */
     public function setHref($href)
@@ -203,6 +253,8 @@ class BlogPost
     }
 
     /**
+     * @var string
+     *
      * @ORM\Column(nullable=true)
      * @Assert\Url(message="Url is not valid!", protocols={"http", "https"})
      * @Expose()
@@ -210,6 +262,8 @@ class BlogPost
     private $href;
 
     /**
+     * Get enabled
+     *
      * @return mixed
      */
     public function getEnabled()
@@ -218,6 +272,8 @@ class BlogPost
     }
 
     /**
+     * Set enabled
+     *
      * @param mixed $enabled
      */
     public function setEnabled($enabled)
@@ -226,6 +282,8 @@ class BlogPost
     }
 
     /**
+     * Get views count
+     *
      * @return mixed
      */
     public function getViewsCount()
@@ -234,6 +292,8 @@ class BlogPost
     }
 
     /**
+     * Set views count
+     *
      * @param mixed $views_count
      */
     public function setViewsCount($views_count)
@@ -242,6 +302,8 @@ class BlogPost
     }
 
     /**
+     * Get likes count
+     *
      * @return mixed
      */
     public function getLikesCount()
@@ -250,6 +312,8 @@ class BlogPost
     }
 
     /**
+     * Set likes count
+     *
      * @param mixed $likes_count
      */
     public function setLikesCount($likes_count)
@@ -258,6 +322,8 @@ class BlogPost
     }
 
     /**
+     * Get created date
+     *
      * @return mixed
      */
     public function getCreatedDate()
@@ -266,6 +332,8 @@ class BlogPost
     }
 
     /**
+     * Set created date
+     *
      * @param mixed $created_date
      */
     public function setCreatedDate($created_date)
@@ -275,6 +343,8 @@ class BlogPost
 
 
     /**
+     * Get id
+     *
      * @return mixed
      */
     public function getId()
@@ -283,6 +353,8 @@ class BlogPost
     }
 
     /**
+     * Set id
+     *
      * @param mixed $id
      */
     public function setId($id)
@@ -291,6 +363,8 @@ class BlogPost
     }
 
     /**
+     * Get title
+     *
      * @return mixed
      */
     public function getTitle()
@@ -299,6 +373,8 @@ class BlogPost
     }
 
     /**
+     * Set title
+     *
      * @param mixed $title
      */
     public function setTitle($title)
@@ -307,6 +383,8 @@ class BlogPost
     }
 
     /**
+     * Get short
+     *
      * @return mixed
      */
     public function getShort()
@@ -315,6 +393,8 @@ class BlogPost
     }
 
     /**
+     * Set short
+     *
      * @param mixed $short
      */
     public function setShort($short)
@@ -323,6 +403,8 @@ class BlogPost
     }
 
     /**
+     * Get body
+     *
      * @return mixed
      */
     public function getBody()
@@ -331,6 +413,8 @@ class BlogPost
     }
 
     /**
+     * Set body
+     *
      * @param mixed $body
      */
     public function setBody($body)
@@ -339,6 +423,8 @@ class BlogPost
     }
 
     /**
+     * Get modified date
+     *
      * @return mixed
      */
     public function getModifiedDate()
@@ -347,6 +433,8 @@ class BlogPost
     }
 
     /**
+     * Set modified date
+     *
      * @param mixed $modified_date
      */
     public function setModifiedDate($modified_date)
@@ -355,19 +443,34 @@ class BlogPost
     }
 
 
+    /**
+     * @var UploadedFile
+     */
     private $file;
 
+    /**
+     * Set file
+     *
+     * @param UploadedFile $file
+     */
     public function setFile(UploadedFile $file)
     {
         $this->file = $file;
     }
 
+    /**
+     * Get file
+     *
+     * @return UploadedFile
+     */
     public function getFile()
     {
         return $this->file;
     }
 
     /**
+     * Generate label
+     *
      * @ORM\PrePersist
      * @ORM\PreUpdate
      */
@@ -378,12 +481,17 @@ class BlogPost
         $this->setLabel($label);
     }
 
+    /**
+     * Set updated
+     */
     public function setUpdated()
     {
         $this->setModifiedDate(new \DateTime());
     }
 
     /**
+     * Get image token
+     *
      * @return mixed
      */
     public function getImageToken()
@@ -392,6 +500,8 @@ class BlogPost
     }
 
     /**
+     * Set image token
+     *
      * @param mixed $image_token
      */
     public function setImageToken($image_token)
@@ -400,7 +510,8 @@ class BlogPost
     }
 
     /**
-     * set model fields from array
+     * Set entity fields from array
+     *
      * @param array $data
      */
     public function setFromArray($data = [])

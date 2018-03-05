@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * Setting
+ * Settings class. Store key-value pairs in db
  * @ORM\Entity(repositoryClass="AppBundle\Repository\SettingRepository")
  * @ORM\Table(name="setting")
  * @UniqueEntity("skey")
@@ -37,6 +37,8 @@ class Setting
     private $value;
 
     /**
+     * Get id
+     *
      * @return int
      */
     public function getId()
@@ -45,6 +47,8 @@ class Setting
     }
 
     /**
+     * Set id
+     *
      * @param int $id
      */
     public function setId($id)
@@ -53,6 +57,8 @@ class Setting
     }
 
     /**
+     * Get key
+     *
      * @return string
      */
     public function getSkey()
@@ -61,6 +67,8 @@ class Setting
     }
 
     /**
+     * Set key
+     *
      * @param string $skey
      */
     public function setSkey($skey)
@@ -69,6 +77,8 @@ class Setting
     }
 
     /**
+     * Get value
+     *
      * @return string
      */
     public function getValue()
@@ -77,6 +87,8 @@ class Setting
     }
 
     /**
+     * Set value
+     *
      * @param string $value
      */
     public function setValue($value)
@@ -84,6 +96,10 @@ class Setting
         $this->value = $value;
     }
 
+    /**
+     * Is this new empty setting?
+     * @return bool
+     */
     public function isNew() {
         return empty($this->getSkey()) && empty($this->getValue());
     }

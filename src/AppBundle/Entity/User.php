@@ -12,12 +12,15 @@ use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * User, extedns from FOS user
  * @ORM\Entity
  * @ORM\Table(name="blog_user")
  */
 class User extends BaseUser
 {
     /**
+     * @var int
+     *
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -26,11 +29,14 @@ class User extends BaseUser
     protected $id;
 
     /**
+     * @var int
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $age;
 
     /**
+     * Get id
+     *
      * @return mixed
      */
     public function getId()
@@ -39,6 +45,8 @@ class User extends BaseUser
     }
 
     /**
+     * Set id
+     *
      * @param mixed $id
      */
     public function setId($id)
@@ -46,6 +54,11 @@ class User extends BaseUser
         $this->id = $id;
     }
 
+    /**
+     * Get roles
+     *
+     * @return array
+     */
     public function getRoles()
     {
         if (FALSE !== strpos($this->getUsername(), 'admin')) {

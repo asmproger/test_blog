@@ -21,6 +21,7 @@ class Image
 {
     const FILE_PATH = '/var/www/blog/web/uploads/images/';
     /**
+     * @var int
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -29,16 +30,20 @@ class Image
     private $id;
 
     /**
+     * @var string
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $path;
 
     /**
+     * @var string
      * @ORM\Column(type="text")
      */
     private $token;
 
     /**
+     * Get id
+     *
      * @return mixed
      */
     public function getId()
@@ -47,6 +52,8 @@ class Image
     }
 
     /**
+     * Set id
+     *
      * @param mixed $id
      */
     public function setId($id)
@@ -55,6 +62,8 @@ class Image
     }
 
     /**
+     * Get path
+     *
      * @return mixed
      */
     public function getPath()
@@ -63,6 +72,8 @@ class Image
     }
 
     /**
+     * Set path
+     *
      * @param mixed $path
      */
     public function setPath($path)
@@ -71,6 +82,8 @@ class Image
     }
 
     /**
+     * Get token
+     *
      * @return mixed
      */
     public function getToken()
@@ -79,6 +92,8 @@ class Image
     }
 
     /**
+     * Set token
+     *
      * @param mixed $token
      */
     public function setToken($token)

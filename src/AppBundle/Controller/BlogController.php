@@ -16,9 +16,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\QueryBuilder;
 
+/**
+ * Class for simple CRUD operations with blog (without ajax, angular, etc.)
+ * Class BlogController
+ * @package AppBundle\Controller
+ */
 class BlogController extends Controller
 {
     /**
+     * Blogposts list
      * @Route("/blog", name="blog_index")
      */
     public function indexAction(Request $request)
@@ -42,6 +48,7 @@ class BlogController extends Controller
     }
 
     /**
+     * Blogpost view action
      * @Route("/blog-post/{id}", name="blog_view", requirements={"id"="\d+"})
      */
     public function pageAction(Request $request)
@@ -60,6 +67,7 @@ class BlogController extends Controller
     }
 
     /**
+     * Add new blogpost action
      * @param Request $request
      * @Route("/blog-add", name="blog_add")
      */
@@ -117,6 +125,7 @@ class BlogController extends Controller
     }
 
     /**
+     * Edit exist blogpost item action
      * @param Request $request
      * @route("blog-edit/{id}", name="blog_edit", requirements={"id"="\d+"})
      */
@@ -134,6 +143,7 @@ class BlogController extends Controller
 
         if($form->isSubmitted() && $form->isValid()) {
 
+            // Blogpost picture processing
             $file = $post->getPic();
             if($file) {
                 $newName = md5(time()) . '.' . $file->guessExtension();
@@ -160,6 +170,11 @@ class BlogController extends Controller
         ]);
     }
 
+    /**
+     * Create blogpost form here
+     * @param BlogPost $post
+     * @return \Symfony\Component\Form\FormInterface
+     */
     private function getForm(BlogPost $post)
     {
         $builder = $this->createFormBuilder($post);

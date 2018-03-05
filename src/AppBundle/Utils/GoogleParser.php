@@ -12,10 +12,9 @@ use AppBundle\Entity\BlogPost;
 use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
+ * This class parse results of search request to google
  * Class GoogleParser
  * @package AppBundle\Service
- *
- * This class parse results of search request to google
  */
 class GoogleParser
 {

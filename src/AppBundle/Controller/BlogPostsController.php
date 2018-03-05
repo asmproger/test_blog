@@ -29,6 +29,11 @@ use Symfony\Component\HttpFoundation\Response;
 use \FOS\RestBundle\View\View as RestView;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * REST API class for blogposts
+ * Class BlogPostsController
+ * @package AppBundle\Controller
+ */
 class BlogPostsController extends FOSRestController
 {
 
@@ -57,7 +62,7 @@ class BlogPostsController extends FOSRestController
 
 
     /**
-     * one action for put & post request
+     * one action for create & edit blogpost (put & post request)
      * @param Request $request
      * @Route("api/v1/blog.{_format}", name="api_post_action", methods={"POST", "PUT"}, defaults={"_format"="json"})
      */
