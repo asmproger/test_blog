@@ -13,7 +13,6 @@ use AppBundle\Entity\Page;
 use Knp\Menu\FactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Menu builder for KNP menu
@@ -43,11 +42,6 @@ class Builder implements ContainerAwareInterface
                 'routeParameters' => array('url' => $item->getUrl())
             ));
         }
-
-        // create another menu item
-        //$menu->addChild('About Me', array('route' => 'homepage'));
-        // you can also add sub level's to your menu's as follows
-        //$menu['About Me']->addChild('Edit profile', array('route' => 'default_test'));
         return $menu;
     }
 }

@@ -10,8 +10,6 @@ namespace AppBundle\Utils;
 
 use AppBundle\Entity\Setting;
 use AppBundle\Entity\BlogPost;
-//use Doctrine\Bundle\DoctrineBundle\Registry;
-use AppBundle\EventListener\FetchListener;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -48,7 +46,10 @@ class QueryHelper
 
     private $e;
 
-    public function execute(OutputInterface $output)
+    /**
+     * QueryHelper main method. All the logic here.
+     */
+    public function execute()
     {
         // lets get settings from db
         $query = trim($this->doctrine->getRepository(Setting::class)->getSetting('parser_task_query', ''));
@@ -114,16 +115,6 @@ class QueryHelper
         }
 
         $event = new GenericEvent(function () {}, $report);
-        $output->writeln('e 3');
         $this->e->dispatch('custom_fetch', $event);
-        // let's notify someone about task results
-        /*$message = (new \Swift_Message('Hello Email'))
-            ->setFrom('no-reply@test_blog.local')
-            ->setTo('asmproger@gmail.com')
-            ->setBody(
-                $this->twig->render('partials/email_template.html.twig', ['report' => $report]),
-                'text/html'
-            );
-        $this->mailer->send($message);*/
     }
 }

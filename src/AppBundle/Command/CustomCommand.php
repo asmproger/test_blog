@@ -15,7 +15,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * This is custom command for Symfony console.
@@ -84,6 +83,6 @@ class CustomCommand extends Command
         ]);
 
         $output->writeln('Executing...');
-        $this->helper->execute($output);
+        $this->helper->execute();
     }
 }

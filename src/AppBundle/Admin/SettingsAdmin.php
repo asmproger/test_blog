@@ -9,7 +9,6 @@
 namespace AppBundle\Admin;
 
 use AppBundle\Entity\Setting;
-use AppBundle\Utils\QueryHelper;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;

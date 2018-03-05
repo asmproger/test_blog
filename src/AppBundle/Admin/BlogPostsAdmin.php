@@ -9,7 +9,6 @@
 namespace AppBundle\Admin;
 
 use AppBundle\Entity\BlogPost;
-use AppBundle\Repository\BlogPostRepository;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
